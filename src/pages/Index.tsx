@@ -19,15 +19,19 @@ const Index = () => {
         .from('medical_needs')
         .select(`
           *,
-          profiles!medical_needs_user_id_fkey(
+          profiles(
             first_name,
             last_name,
             avatar_url
           )
         `)
+        .eq('profiles.id', 'user_id')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching medical needs:', error);
+        throw error;
+      }
       return data;
     },
   });

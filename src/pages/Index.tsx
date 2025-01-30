@@ -19,7 +19,7 @@ const Index = () => {
         .from('medical_needs')
         .select(`
           *,
-          profiles:user_id (
+          profiles!medical_needs_user_id_fkey(
             first_name,
             last_name,
             avatar_url

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/providers/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -15,6 +15,9 @@ import {
 } from "@/components/ui/select";
 import { Navigation } from "@/components/Navigation";
 import { Card } from "@/components/ui/card";
+import type { Database } from "@/integrations/supabase/types";
+
+type UrgencyType = Database["public"]["Enums"]["medical_need_urgency"];
 
 const CreateNeed = () => {
   const { user } = useAuth();
@@ -26,7 +29,7 @@ const CreateNeed = () => {
     title: "",
     description: "",
     amount_needed: "",
-    urgency: "",
+    urgency: "" as UrgencyType,
     location: "",
   });
 
@@ -43,16 +46,14 @@ const CreateNeed = () => {
 
     setIsSubmitting(true);
     try {
-      const { error } = await supabase.from("medical_needs").insert([
-        {
-          user_id: user.id,
-          title: formData.title,
-          description: formData.description,
-          amount_needed: parseFloat(formData.amount_needed),
-          urgency: formData.urgency,
-          location: formData.location,
-        },
-      ]);
+      const { error } = await supabase.from("medical_needs").insert({
+        user_id: user.id,
+        title: formData.title,
+        description: formData.description,
+        amount_needed: parseFloat(formData.amount_needed),
+        urgency: formData.urgency,
+        location: formData.location,
+      });
 
       if (error) throw error;
 
@@ -123,7 +124,7 @@ const CreateNeed = () => {
               <Select
                 required
                 value={formData.urgency}
-                onValueChange={(value) =>
+                onValueChange={(value: UrgencyType) =>
                   setFormData({ ...formData, urgency: value })
                 }
               >

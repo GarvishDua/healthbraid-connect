@@ -9,7 +9,125 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      donations: {
+        Row: {
+          amount: number
+          anonymous: boolean
+          created_at: string
+          donor_id: string | null
+          id: string
+          medical_need_id: string
+          message: string | null
+        }
+        Insert: {
+          amount: number
+          anonymous?: boolean
+          created_at?: string
+          donor_id?: string | null
+          id?: string
+          medical_need_id: string
+          message?: string | null
+        }
+        Update: {
+          amount?: number
+          anonymous?: boolean
+          created_at?: string
+          donor_id?: string | null
+          id?: string
+          medical_need_id?: string
+          message?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "donations_medical_need_id_fkey"
+            columns: ["medical_need_id"]
+            isOneToOne: false
+            referencedRelation: "medical_needs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      medical_needs: {
+        Row: {
+          amount_needed: number
+          amount_raised: number
+          created_at: string
+          description: string
+          id: string
+          location: string
+          medical_proof_url: string | null
+          status: Database["public"]["Enums"]["medical_need_status"]
+          title: string
+          updated_at: string
+          urgency: Database["public"]["Enums"]["medical_need_urgency"]
+          user_id: string
+        }
+        Insert: {
+          amount_needed: number
+          amount_raised?: number
+          created_at?: string
+          description: string
+          id?: string
+          location: string
+          medical_proof_url?: string | null
+          status?: Database["public"]["Enums"]["medical_need_status"]
+          title: string
+          updated_at?: string
+          urgency: Database["public"]["Enums"]["medical_need_urgency"]
+          user_id: string
+        }
+        Update: {
+          amount_needed?: number
+          amount_raised?: number
+          created_at?: string
+          description?: string
+          id?: string
+          location?: string
+          medical_proof_url?: string | null
+          status?: Database["public"]["Enums"]["medical_need_status"]
+          title?: string
+          updated_at?: string
+          urgency?: Database["public"]["Enums"]["medical_need_urgency"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          first_name: string | null
+          id: string
+          last_name: string | null
+          location: string | null
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          first_name?: string | null
+          id: string
+          last_name?: string | null
+          location?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          location?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -18,7 +136,13 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      medical_need_status:
+        | "pending"
+        | "verified"
+        | "in_progress"
+        | "completed"
+        | "rejected"
+      medical_need_urgency: "low" | "medium" | "high" | "critical"
     }
     CompositeTypes: {
       [_ in never]: never

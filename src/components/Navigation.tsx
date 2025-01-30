@@ -1,10 +1,30 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Menu, X, Heart, User, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/providers/AuthProvider";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 export const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleSignOut = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      navigate("/");
+    } catch (error: any) {
+      toast({
+        title: "Error signing out",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <nav className="bg-white shadow-sm">
@@ -30,9 +50,24 @@ export const Navigation = () => {
             <Button variant="outline" className="ml-4">
               <Heart className="mr-2 h-4 w-4" /> Donate
             </Button>
-            <Button>
-              <User className="mr-2 h-4 w-4" /> Sign In
-            </Button>
+            {user ? (
+              <>
+                <Button variant="outline" asChild>
+                  <Link to="/profile">
+                    <User className="mr-2 h-4 w-4" /> Profile
+                  </Link>
+                </Button>
+                <Button variant="ghost" onClick={handleSignOut}>
+                  Sign Out
+                </Button>
+              </>
+            ) : (
+              <Button asChild>
+                <Link to="/auth">
+                  <User className="mr-2 h-4 w-4" /> Sign In
+                </Link>
+              </Button>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -73,9 +108,24 @@ export const Navigation = () => {
               <Button variant="outline" className="w-full mb-2">
                 <Heart className="mr-2 h-4 w-4" /> Donate
               </Button>
-              <Button className="w-full">
-                <User className="mr-2 h-4 w-4" /> Sign In
-              </Button>
+              {user ? (
+                <>
+                  <Button variant="outline" className="w-full mb-2" asChild>
+                    <Link to="/profile">
+                      <User className="mr-2 h-4 w-4" /> Profile
+                    </Link>
+                  </Button>
+                  <Button variant="ghost" className="w-full" onClick={handleSignOut}>
+                    Sign Out
+                  </Button>
+                </>
+              ) : (
+                <Button className="w-full" asChild>
+                  <Link to="/auth">
+                    <User className="mr-2 h-4 w-4" /> Sign In
+                  </Link>
+                </Button>
+              )}
             </div>
           </div>
         </div>

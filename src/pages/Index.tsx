@@ -18,15 +18,7 @@ const Index = () => {
       console.log('Fetching medical needs...');
       const { data: needs, error } = await supabase
         .from('medical_needs')
-        .select(`
-          *,
-          profiles (
-            first_name,
-            last_name,
-            avatar_url
-          )
-        `)
-        .eq('user_id', 'profiles.id')
+        .select('*, profiles(first_name, last_name, avatar_url)')
         .order('created_at', { ascending: false });
 
       if (error) {

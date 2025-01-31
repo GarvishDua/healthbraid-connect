@@ -16,18 +16,37 @@ const Index = () => {
     queryKey: ['medicalNeeds'],
     queryFn: async () => {
       console.log('Fetching medical needs...');
-      const { data: needs, error } = await supabase
+      // First, fetch all medical needs
+      const { data: needs, error: needsError } = await supabase
         .from('medical_needs')
-        .select('*, profiles(first_name, last_name, avatar_url)')
+        .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Error fetching medical needs:', error);
-        throw error;
+      if (needsError) {
+        console.error('Error fetching medical needs:', needsError);
+        throw needsError;
       }
 
-      console.log('Medical needs with profiles:', needs);
-      return needs;
+      // Then, fetch all associated profiles
+      const userIds = needs?.map(need => need.user_id) || [];
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, first_name, last_name, avatar_url')
+        .in('id', userIds);
+
+      if (profilesError) {
+        console.error('Error fetching profiles:', profilesError);
+        throw profilesError;
+      }
+
+      // Combine the data
+      const needsWithProfiles = needs?.map(need => ({
+        ...need,
+        profiles: profiles?.find(profile => profile.id === need.user_id)
+      }));
+
+      console.log('Medical needs with profiles:', needsWithProfiles);
+      return needsWithProfiles;
     },
   });
 

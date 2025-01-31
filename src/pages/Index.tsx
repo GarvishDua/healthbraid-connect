@@ -1,12 +1,14 @@
 import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Heart, Users, Search, Calendar, Plus } from "lucide-react";
+import { Heart, Users, Search, Calendar, Plus, MapPin, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/providers/AuthProvider";
 import { useToast } from "@/components/ui/use-toast";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 
 const Index = () => {
   const { user } = useAuth();
@@ -50,6 +52,28 @@ const Index = () => {
     },
   });
 
+  const getUrgencyColor = (urgency: string) => {
+    switch (urgency) {
+      case 'critical':
+        return 'bg-red-100 text-red-800';
+      case 'high':
+        return 'bg-orange-100 text-orange-800';
+      case 'medium':
+        return 'bg-yellow-100 text-yellow-800';
+      default:
+        return 'bg-green-100 text-green-800';
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-primary-50 to-white">
       <Navigation />
@@ -88,49 +112,77 @@ const Index = () => {
       {/* Medical Needs Section */}
       <section className="py-20 px-4 bg-white">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-12">Current Medical Needs</h2>
+          <div className="flex justify-between items-center mb-12">
+            <h2 className="text-3xl font-bold">Current Medical Needs</h2>
+            <Button asChild>
+              <Link to="/find-help">View All Needs</Link>
+            </Button>
+          </div>
+          
           {isLoading ? (
-            <div className="text-center">Loading medical needs...</div>
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
+              <p className="mt-4 text-gray-600">Loading medical needs...</p>
+            </div>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {medicalNeeds?.map((need) => (
-                <Card key={need.id} className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div>
-                      <h3 className="text-xl font-semibold mb-2">{need.title}</h3>
-                      <p className="text-gray-600 line-clamp-3">{need.description}</p>
+              {medicalNeeds?.slice(0, 6).map((need) => (
+                <Card key={need.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                  <div className="p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <div>
+                        <h3 className="text-xl font-semibold mb-2">{need.title}</h3>
+                        <div className="flex items-center text-gray-600 text-sm mb-2">
+                          <MapPin className="h-4 w-4 mr-1" />
+                          <span>{need.location}</span>
+                        </div>
+                        <div className="flex items-center text-gray-600 text-sm">
+                          <Clock className="h-4 w-4 mr-1" />
+                          <span>Posted {formatDate(need.created_at)}</span>
+                        </div>
+                      </div>
+                      <Badge className={`${getUrgencyColor(need.urgency)}`}>
+                        {need.urgency}
+                      </Badge>
                     </div>
-                    <span className={`px-3 py-1 rounded-full text-sm ${
-                      need.urgency === 'critical' ? 'bg-red-100 text-red-800' :
-                      need.urgency === 'high' ? 'bg-orange-100 text-orange-800' :
-                      need.urgency === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-green-100 text-green-800'
-                    }`}>
-                      {need.urgency}
-                    </span>
-                  </div>
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-600">Amount needed:</span>
-                      <span className="font-semibold">${need.amount_needed}</span>
+                    
+                    <p className="text-gray-600 line-clamp-3 mb-4">{need.description}</p>
+                    
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-gray-600">Progress</span>
+                        <span className="font-semibold">
+                          ${need.amount_raised.toLocaleString()} of ${need.amount_needed.toLocaleString()}
+                        </span>
+                      </div>
+                      <Progress 
+                        value={(need.amount_raised / need.amount_needed) * 100} 
+                        className="h-2"
+                      />
+                      <div className="flex items-center justify-between pt-2">
+                        <div className="flex items-center">
+                          {need.profiles?.avatar_url ? (
+                            <img 
+                              src={need.profiles.avatar_url} 
+                              alt="Profile" 
+                              className="w-8 h-8 rounded-full mr-2"
+                            />
+                          ) : (
+                            <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center mr-2">
+                              <Users className="h-4 w-4 text-gray-500" />
+                            </div>
+                          )}
+                          <span className="text-sm text-gray-600">
+                            {need.profiles?.first_name} {need.profiles?.last_name}
+                          </span>
+                        </div>
+                        <Button asChild>
+                          <Link to={`/need/${need.id}`}>
+                            <Heart className="mr-2 h-4 w-4" /> Help Now
+                          </Link>
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-600">Amount raised:</span>
-                      <span className="font-semibold">${need.amount_raised}</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2.5">
-                      <div
-                        className="bg-primary-600 h-2.5 rounded-full"
-                        style={{
-                          width: `${Math.min((need.amount_raised / need.amount_needed) * 100, 100)}%`
-                        }}
-                      ></div>
-                    </div>
-                    <Button className="w-full" asChild>
-                      <Link to={`/need/${need.id}`}>
-                        <Heart className="mr-2 h-4 w-4" /> Help Now
-                      </Link>
-                    </Button>
                   </div>
                 </Card>
               ))}

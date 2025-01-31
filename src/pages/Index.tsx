@@ -15,37 +15,26 @@ const Index = () => {
   const { data: medicalNeeds, isLoading } = useQuery({
     queryKey: ['medicalNeeds'],
     queryFn: async () => {
-      // First get all medical needs
-      const { data: needs, error: needsError } = await supabase
+      console.log('Fetching medical needs...');
+      const { data: needs, error } = await supabase
         .from('medical_needs')
-        .select('*')
+        .select(`
+          *,
+          profile:profiles!medical_needs_user_id_fkey(
+            first_name,
+            last_name,
+            avatar_url
+          )
+        `)
         .order('created_at', { ascending: false });
 
-      if (needsError) {
-        console.error('Error fetching medical needs:', needsError);
-        throw needsError;
+      if (error) {
+        console.error('Error fetching medical needs:', error);
+        throw error;
       }
 
-      // Then get all profiles for the user_ids
-      const userIds = needs?.map(need => need.user_id) || [];
-      const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
-        .select('id, first_name, last_name, avatar_url')
-        .in('id', userIds);
-
-      if (profilesError) {
-        console.error('Error fetching profiles:', profilesError);
-        throw profilesError;
-      }
-
-      // Combine the data
-      const needsWithProfiles = needs?.map(need => ({
-        ...need,
-        profile: profiles?.find(profile => profile.id === need.user_id)
-      }));
-
-      console.log('Medical needs with profiles:', needsWithProfiles);
-      return needsWithProfiles;
+      console.log('Medical needs with profiles:', needs);
+      return needs;
     },
   });
 

@@ -1,14 +1,12 @@
-import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/providers/AuthProvider";
-import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { ProfileForm } from "@/components/profile/ProfileForm";
+import { ActivitySection } from "@/components/profile/ActivitySection";
 
 interface Profile {
   id: string;
@@ -23,17 +21,6 @@ interface Profile {
 const Profile = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState<Profile>({
-    id: "",
-    first_name: "",
-    last_name: "",
-    avatar_url: "",
-    phone: "",
-    location: "",
-    bio: "",
-  });
 
   const { data: profile, isLoading } = useQuery({
     queryKey: ['profile', user?.id],
@@ -54,45 +41,8 @@ const Profile = () => {
   useEffect(() => {
     if (!user) {
       navigate("/auth");
-      return;
     }
-    
-    if (profile) {
-      setFormData(profile);
-    }
-  }, [profile, user, navigate]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user) return;
-
-    try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          first_name: formData.first_name,
-          last_name: formData.last_name,
-          phone: formData.phone,
-          location: formData.location,
-          bio: formData.bio,
-        })
-        .eq('id', user.id);
-
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: "Your profile has been updated",
-      });
-      setIsEditing(false);
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  };
+  }, [user, navigate]);
 
   if (isLoading) {
     return (
@@ -105,6 +55,10 @@ const Profile = () => {
     );
   }
 
+  if (!profile) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation />
@@ -112,102 +66,12 @@ const Profile = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Profile</CardTitle>
-            <Button
-              variant={isEditing ? "outline" : "default"}
-              onClick={() => setIsEditing(!isEditing)}
-            >
-              {isEditing ? "Cancel" : "Edit Profile"}
-            </Button>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium mb-2">First Name</label>
-                  <Input
-                    value={formData.first_name || ""}
-                    onChange={(e) =>
-                      setFormData({ ...formData, first_name: e.target.value })
-                    }
-                    disabled={!isEditing}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">Last Name</label>
-                  <Input
-                    value={formData.last_name || ""}
-                    onChange={(e) =>
-                      setFormData({ ...formData, last_name: e.target.value })
-                    }
-                    disabled={!isEditing}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">Phone</label>
-                  <Input
-                    value={formData.phone || ""}
-                    onChange={(e) =>
-                      setFormData({ ...formData, phone: e.target.value })
-                    }
-                    disabled={!isEditing}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">Location</label>
-                  <Input
-                    value={formData.location || ""}
-                    onChange={(e) =>
-                      setFormData({ ...formData, location: e.target.value })
-                    }
-                    disabled={!isEditing}
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">Bio</label>
-                <Textarea
-                  value={formData.bio || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, bio: e.target.value })
-                  }
-                  disabled={!isEditing}
-                  rows={4}
-                />
-              </div>
-              {isEditing && (
-                <Button type="submit" className="w-full">
-                  Save Changes
-                </Button>
-              )}
-            </form>
+            <ProfileForm initialData={profile} />
           </CardContent>
         </Card>
-
-        <div className="mt-8">
-          <h2 className="text-2xl font-bold mb-6">Your Activity</h2>
-          <div className="grid md:grid-cols-2 gap-8">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Your Medical Needs</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Button className="w-full" asChild>
-                  <Link to="/create-need">Create New Medical Need</Link>
-                </Button>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Your Donations</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Button className="w-full" variant="outline" asChild>
-                  <Link to="/find-help">Browse Medical Needs</Link>
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+        <ActivitySection />
       </div>
     </div>
   );

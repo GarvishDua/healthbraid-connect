@@ -20,13 +20,12 @@ const Index = () => {
         .from('medical_needs')
         .select(`
           *,
-          profiles!inner(
+          profiles (
             first_name,
             last_name,
             avatar_url
           )
         `)
-        .eq('profiles.id', 'user_id')
         .order('created_at', { ascending: false });
 
       if (error) {

@@ -7,6 +7,10 @@ import { AuthProvider } from "@/providers/AuthProvider";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import CreateNeed from "./pages/CreateNeed";
+import FindHelp from "./pages/FindHelp";
+import GiveHelp from "./pages/GiveHelp";
+import About from "./pages/About";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,6 +26,10 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/create-need" element={<CreateNeed />} />
+            <Route path="/find-help" element={<FindHelp />} />
+            <Route path="/give-help" element={<GiveHelp />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/profile" element={<Profile />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

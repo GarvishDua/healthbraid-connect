@@ -2,7 +2,7 @@ import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { Search, Users } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -14,20 +14,38 @@ const FindHelp = () => {
   const { data: medicalNeeds, isLoading } = useQuery({
     queryKey: ['medicalNeeds'],
     queryFn: async () => {
-      const { data: needs, error } = await supabase
+      console.log('Fetching medical needs...');
+      // First, fetch all medical needs
+      const { data: needs, error: needsError } = await supabase
         .from('medical_needs')
-        .select(`
-          *,
-          profiles:user_id (
-            first_name,
-            last_name,
-            avatar_url
-          )
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      return needs;
+      if (needsError) {
+        console.error('Error fetching medical needs:', needsError);
+        throw needsError;
+      }
+
+      // Then, fetch all associated profiles
+      const userIds = needs?.map(need => need.user_id) || [];
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, first_name, last_name, avatar_url')
+        .in('id', userIds);
+
+      if (profilesError) {
+        console.error('Error fetching profiles:', profilesError);
+        throw profilesError;
+      }
+
+      // Combine the data
+      const needsWithProfiles = needs?.map(need => ({
+        ...need,
+        profile: profiles?.find(profile => profile.id === need.user_id)
+      }));
+
+      console.log('Medical needs with profiles:', needsWithProfiles);
+      return needsWithProfiles;
     },
   });
 
@@ -105,9 +123,27 @@ const FindHelp = () => {
                         }}
                       ></div>
                     </div>
-                    <Button className="w-full" asChild>
-                      <Link to={`/need/${need.id}`}>View Details</Link>
-                    </Button>
+                    <div className="flex items-center justify-between pt-2">
+                      <div className="flex items-center">
+                        {need.profile?.avatar_url ? (
+                          <img 
+                            src={need.profile.avatar_url} 
+                            alt="Profile" 
+                            className="w-8 h-8 rounded-full mr-2"
+                          />
+                        ) : (
+                          <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center mr-2">
+                            <Users className="h-4 w-4 text-gray-500" />
+                          </div>
+                        )}
+                        <span className="text-sm text-gray-600">
+                          {need.profile?.first_name} {need.profile?.last_name}
+                        </span>
+                      </div>
+                      <Button asChild>
+                        <Link to={`/need/${need.id}`}>View Details</Link>
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>

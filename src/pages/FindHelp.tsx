@@ -2,7 +2,7 @@ import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Search, Users } from "lucide-react";
+import { Search, Users, Heart, ArrowRight } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -140,8 +140,19 @@ const FindHelp = () => {
                           {need.profile?.first_name} {need.profile?.last_name}
                         </span>
                       </div>
-                      <Button asChild>
-                        <Link to={`/need/${need.id}`}>View Details</Link>
+                    </div>
+                    <div className="flex gap-2 pt-4">
+                      <Button variant="outline" className="flex-1" asChild>
+                        <Link to={`/need/${need.id}`}>
+                          <ArrowRight className="h-4 w-4 mr-2" />
+                          View Details
+                        </Link>
+                      </Button>
+                      <Button className="flex-1" asChild>
+                        <Link to={`/need/${need.id}/donate`}>
+                          <Heart className="h-4 w-4 mr-2" />
+                          Help Now
+                        </Link>
                       </Button>
                     </div>
                   </div>

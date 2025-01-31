@@ -12,6 +12,7 @@ import GiveHelp from "./pages/GiveHelp";
 import About from "./pages/About";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
+import HelpNow from "./pages/HelpNow";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +31,7 @@ const App = () => (
             <Route path="/give-help" element={<GiveHelp />} />
             <Route path="/about" element={<About />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/need/:needId/donate" element={<HelpNow />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

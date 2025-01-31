@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,7 +8,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/providers/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 
 interface Profile {
@@ -52,10 +52,15 @@ const Profile = () => {
   });
 
   useEffect(() => {
+    if (!user) {
+      navigate("/auth");
+      return;
+    }
+    
     if (profile) {
       setFormData(profile);
     }
-  }, [profile]);
+  }, [profile, user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,11 +93,6 @@ const Profile = () => {
       });
     }
   };
-
-  if (!user) {
-    navigate("/auth");
-    return null;
-  }
 
   if (isLoading) {
     return (

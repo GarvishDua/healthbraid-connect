@@ -44,7 +44,7 @@ const Index = () => {
       // Combine the data
       const needsWithProfiles = needs?.map(need => ({
         ...need,
-        profiles: profiles?.find(profile => profile.id === need.user_id)
+        profile: profiles?.find(profile => profile.id === need.user_id)
       }));
 
       console.log('Medical needs with profiles:', needsWithProfiles);
@@ -161,9 +161,9 @@ const Index = () => {
                       />
                       <div className="flex items-center justify-between pt-2">
                         <div className="flex items-center">
-                          {need.profiles?.avatar_url ? (
+                          {need.profile?.avatar_url ? (
                             <img 
-                              src={need.profiles.avatar_url} 
+                              src={need.profile.avatar_url} 
                               alt="Profile" 
                               className="w-8 h-8 rounded-full mr-2"
                             />
@@ -173,7 +173,7 @@ const Index = () => {
                             </div>
                           )}
                           <span className="text-sm text-gray-600">
-                            {need.profiles?.first_name} {need.profiles?.last_name}
+                            {need.profile?.first_name} {need.profile?.last_name}
                           </span>
                         </div>
                         <Button asChild>

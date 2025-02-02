@@ -48,7 +48,7 @@ const HelpNow = () => {
       // Then, fetch the associated profile
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('first_name, last_name')
+        .select('first_name, last_name, avatar_url')
         .eq('id', need.user_id)
         .single();
 

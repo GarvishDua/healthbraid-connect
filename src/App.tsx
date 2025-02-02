@@ -14,6 +14,8 @@ import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import HelpNow from "./pages/HelpNow";
 import AIAssistant from "./pages/AIAssistant";
+import VolunteerLocally from "./pages/VolunteerLocally";
+import OrganizeFundraisers from "./pages/OrganizeFundraisers";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +36,8 @@ const App = () => (
             <Route path="/profile" element={<Profile />} />
             <Route path="/need/:needId/donate" element={<HelpNow />} />
             <Route path="/ai-assistant" element={<AIAssistant />} />
+            <Route path="/volunteer" element={<VolunteerLocally />} />
+            <Route path="/create-fundraiser" element={<OrganizeFundraisers />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

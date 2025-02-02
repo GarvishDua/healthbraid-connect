@@ -1,5 +1,4 @@
 import { Navigation } from "@/components/Navigation";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -7,17 +6,23 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/providers/AuthProvider";
 import { useQuery } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { useNavigate, useParams } from "react-router-dom";
 import { useState } from "react";
+import { Heart, Users } from "lucide-react";
 
 const HelpNow = () => {
   const { needId } = useParams();
-  const { user } = useAuth();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { toast } = useToast();
   const [amount, setAmount] = useState("");
   const [message, setMessage] = useState("");
   const [isAnonymous, setIsAnonymous] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { data: medicalNeed, isLoading } = useQuery({
     queryKey: ['medicalNeed', needId],
@@ -68,49 +73,90 @@ const HelpNow = () => {
     
     if (!user) {
       toast({
-        title: "Please sign in",
-        description: "You need to be signed in to make a donation.",
-        variant: "destructive",
+        title: "Authentication required",
+        description: "Please sign in to make a donation.",
+        variant: "destructive"
       });
       navigate("/auth");
       return;
     }
 
+    if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
+      toast({
+        title: "Invalid amount",
+        description: "Please enter a valid donation amount.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
     try {
       const { error } = await supabase
         .from('donations')
         .insert({
-          donor_id: user.id,
           medical_need_id: needId,
-          amount: parseFloat(amount),
+          donor_id: user.id,
+          amount: Number(amount),
           message: message || null,
-          anonymous: isAnonymous,
+          anonymous: isAnonymous
         });
 
       if (error) throw error;
 
+      // Update the amount raised
+      const { error: updateError } = await supabase
+        .from('medical_needs')
+        .update({
+          amount_raised: medicalNeed!.amount_raised + Number(amount)
+        })
+        .eq('id', needId);
+
+      if (updateError) throw updateError;
+
       toast({
-        title: "Thank you for your donation!",
-        description: "Your support means a lot to those in need.",
+        title: "Donation successful",
+        description: "Thank you for your generous donation!",
       });
 
+      // Redirect back to the medical need page
       navigate(`/need/${needId}`);
-    } catch (error: any) {
+    } catch (error) {
+      console.error('Error making donation:', error);
       toast({
-        title: "Error making donation",
-        description: error.message,
-        variant: "destructive",
+        title: "Error",
+        description: "There was an error processing your donation. Please try again.",
+        variant: "destructive"
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   if (isLoading) {
-    return <div className="text-center py-12">Loading...</div>;
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navigation />
+        <div className="max-w-4xl mx-auto px-4 py-12">
+          <div className="text-center">Loading medical need details...</div>
+        </div>
+      </div>
+    );
   }
 
   if (!medicalNeed) {
-    return <div className="text-center py-12">Medical need not found</div>;
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navigation />
+        <div className="max-w-4xl mx-auto px-4 py-12">
+          <div className="text-center">Medical need not found</div>
+        </div>
+      </div>
+    );
   }
+
+  const progressPercentage = (medicalNeed.amount_raised / medicalNeed.amount_needed) * 100;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -118,74 +164,83 @@ const HelpNow = () => {
       <div className="max-w-4xl mx-auto px-4 py-12">
         <Card>
           <CardHeader>
-            <CardTitle>Make a Donation</CardTitle>
+            <CardTitle className="text-2xl">Make a Donation</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="mb-6">
-              <h2 className="text-xl font-semibold mb-2">{medicalNeed.title}</h2>
-              <p className="text-gray-600">{medicalNeed.description}</p>
-              <div className="mt-4">
-                <div className="flex justify-between text-sm text-gray-600 mb-2">
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-xl font-semibold mb-2">{medicalNeed.title}</h3>
+                <p className="text-gray-600 mb-4">{medicalNeed.description}</p>
+                <div className="flex items-center mb-2">
+                  {medicalNeed.profile?.avatar_url ? (
+                    <img 
+                      src={medicalNeed.profile.avatar_url} 
+                      alt="Profile" 
+                      className="w-8 h-8 rounded-full mr-2"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center mr-2">
+                      <Users className="h-4 w-4 text-gray-500" />
+                    </div>
+                  )}
+                  <span className="text-sm text-gray-600">
+                    {medicalNeed.profile?.first_name} {medicalNeed.profile?.last_name}
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
                   <span>Progress</span>
                   <span>${medicalNeed.amount_raised} of ${medicalNeed.amount_needed}</span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2.5">
-                  <div
-                    className="bg-primary h-2.5 rounded-full"
-                    style={{
-                      width: `${Math.min((medicalNeed.amount_raised / medicalNeed.amount_needed) * 100, 100)}%`
-                    }}
-                  ></div>
+                <Progress value={progressPercentage} className="h-2" />
+              </div>
+
+              <form onSubmit={handleDonate} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="amount">Donation Amount ($)</Label>
+                  <Input
+                    id="amount"
+                    type="number"
+                    min="1"
+                    step="0.01"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    placeholder="Enter amount"
+                    required
+                  />
                 </div>
-              </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="message">Message (Optional)</Label>
+                  <Textarea
+                    id="message"
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    placeholder="Add a message of support"
+                  />
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="anonymous"
+                    checked={isAnonymous}
+                    onCheckedChange={setIsAnonymous}
+                  />
+                  <Label htmlFor="anonymous">Make donation anonymous</Label>
+                </div>
+
+                <Button 
+                  type="submit" 
+                  className="w-full" 
+                  disabled={isSubmitting}
+                >
+                  <Heart className="mr-2 h-4 w-4" />
+                  {isSubmitting ? "Processing..." : "Make Donation"}
+                </Button>
+              </form>
             </div>
-
-            <form onSubmit={handleDonate} className="space-y-6">
-              <div>
-                <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-1">
-                  Donation Amount ($)
-                </label>
-                <Input
-                  id="amount"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  required
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  placeholder="Enter amount"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
-                  Message (Optional)
-                </label>
-                <Textarea
-                  id="message"
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Add a message of support"
-                />
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="anonymous"
-                  checked={isAnonymous}
-                  onChange={(e) => setIsAnonymous(e.target.checked)}
-                  className="rounded border-gray-300"
-                />
-                <label htmlFor="anonymous" className="text-sm text-gray-700">
-                  Make this donation anonymous
-                </label>
-              </div>
-
-              <Button type="submit" className="w-full">
-                Confirm Donation
-              </Button>
-            </form>
           </CardContent>
         </Card>
       </div>

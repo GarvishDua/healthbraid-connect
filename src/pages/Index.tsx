@@ -3,22 +3,26 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Heart, Users, Search, Calendar, Plus, MapPin, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/providers/AuthProvider";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { useState } from "react";
+import { Textarea } from "@/components/ui/textarea";
 
 const Index = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const [symptoms, setSymptoms] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [recommendation, setRecommendation] = useState("");
 
-  const { data: medicalNeeds, isLoading } = useQuery({
+  const { data: medicalNeeds, isLoading: isLoadingNeeds } = useQuery({
     queryKey: ['medicalNeeds'],
     queryFn: async () => {
       console.log('Fetching medical needs...');
-      // First, fetch all medical needs
       const { data: needs, error: needsError } = await supabase
         .from('medical_needs')
         .select('*')
@@ -29,7 +33,6 @@ const Index = () => {
         throw needsError;
       }
 
-      // Then, fetch all associated profiles
       const userIds = needs?.map(need => need.user_id) || [];
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
@@ -41,7 +44,6 @@ const Index = () => {
         throw profilesError;
       }
 
-      // Combine the data
       const needsWithProfiles = needs?.map(need => ({
         ...need,
         profile: profiles?.find(profile => profile.id === need.user_id)
@@ -52,26 +54,39 @@ const Index = () => {
     },
   });
 
-  const getUrgencyColor = (urgency: string) => {
-    switch (urgency) {
-      case 'critical':
-        return 'bg-red-100 text-red-800';
-      case 'high':
-        return 'bg-orange-100 text-orange-800';
-      case 'medium':
-        return 'bg-yellow-100 text-yellow-800';
-      default:
-        return 'bg-green-100 text-green-800';
+  const handleAIAssistant = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!symptoms.trim()) {
+      toast({
+        title: "Please describe your symptoms",
+        variant: "destructive",
+      });
+      return;
     }
-  };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
+    setIsLoading(true);
+    try {
+      const response = await supabase.functions.invoke('health-assistant', {
+        body: { symptoms },
+      });
+
+      if (response.error) throw response.error;
+
+      setRecommendation(response.data.response);
+      toast({
+        title: "Recommendations generated",
+        description: "Here are some suggested home remedies for your symptoms.",
+      });
+    } catch (error: any) {
+      console.error('Error getting AI recommendations:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate recommendations. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -109,6 +124,55 @@ const Index = () => {
         </div>
       </section>
 
+      {/* AI Health Assistant Section */}
+      <section className="py-20 px-4 bg-gradient-to-b from-white to-primary-50">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">AI Health Assistant</h2>
+            <p className="text-gray-600">
+              Get personalized home remedy suggestions for your symptoms. 
+              Remember: This is not a replacement for professional medical advice.
+            </p>
+          </div>
+
+          <Card className="p-6">
+            <form onSubmit={handleAIAssistant} className="space-y-4">
+              <div>
+                <label htmlFor="symptoms" className="block text-sm font-medium text-gray-700 mb-2">
+                  Describe your symptoms
+                </label>
+                <Textarea
+                  id="symptoms"
+                  placeholder="E.g., I have a mild headache and feeling tired..."
+                  value={symptoms}
+                  onChange={(e) => setSymptoms(e.target.value)}
+                  className="min-h-[100px]"
+                />
+              </div>
+              <Button type="submit" disabled={isLoading} className="w-full">
+                {isLoading ? (
+                  <div className="flex items-center">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Generating recommendations...
+                  </div>
+                ) : (
+                  "Get Recommendations"
+                )}
+              </Button>
+            </form>
+
+            {recommendation && (
+              <div className="mt-6 p-4 bg-primary-50 rounded-lg">
+                <h3 className="font-semibold mb-2">Recommended Home Remedies:</h3>
+                <div className="whitespace-pre-line text-gray-700">
+                  {recommendation}
+                </div>
+              </div>
+            )}
+          </Card>
+        </div>
+      </section>
+
       {/* Medical Needs Section */}
       <section className="py-20 px-4 bg-white">
         <div className="max-w-7xl mx-auto">
@@ -119,7 +183,7 @@ const Index = () => {
             </Button>
           </div>
           
-          {isLoading ? (
+          {isLoadingNeeds ? (
             <div className="text-center py-12">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
               <p className="mt-4 text-gray-600">Loading medical needs...</p>
@@ -138,7 +202,11 @@ const Index = () => {
                         </div>
                         <div className="flex items-center text-gray-600 text-sm">
                           <Clock className="h-4 w-4 mr-1" />
-                          <span>Posted {formatDate(need.created_at)}</span>
+                          <span>Posted {new Date(need.created_at).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                          })}</span>
                         </div>
                       </div>
                       <Badge className={`${getUrgencyColor(need.urgency)}`}>

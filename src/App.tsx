@@ -13,6 +13,7 @@ import About from "./pages/About";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import HelpNow from "./pages/HelpNow";
+import AIAssistant from "./pages/AIAssistant";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +33,7 @@ const App = () => (
             <Route path="/about" element={<About />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/need/:needId/donate" element={<HelpNow />} />
+            <Route path="/ai-assistant" element={<AIAssistant />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

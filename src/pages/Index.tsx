@@ -9,6 +9,7 @@ import { useAuth } from "@/providers/AuthProvider";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { useState } from 'react';
 
 // Helper function to determine urgency color
 const getUrgencyColor = (urgency: string) => {
@@ -27,6 +28,7 @@ const getUrgencyColor = (urgency: string) => {
 const Index = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const [cartItems, setCartItems] = useState<Record<string, number>>({});
 
   const { data: medicalNeeds, isLoading: isLoadingNeeds } = useQuery({
     queryKey: ['medicalNeeds'],
@@ -75,9 +77,6 @@ const Index = () => {
       return data;
     },
   });
-
-  // Add cart functionality
-  const [cartItems, setCartItems] = useState<Record<string, number>>({});
 
   const addToCart = async (medicineId: string) => {
     if (!user) {

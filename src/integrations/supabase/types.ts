@@ -9,6 +9,38 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      cart_items: {
+        Row: {
+          created_at: string
+          id: string
+          medicine_id: string
+          quantity: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          medicine_id: string
+          quantity?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          medicine_id?: string
+          quantity?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cart_items_medicine_id_fkey"
+            columns: ["medicine_id"]
+            isOneToOne: false
+            referencedRelation: "medicines"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       donations: {
         Row: {
           amount: number
@@ -133,6 +165,45 @@ export type Database = {
           },
         ]
       }
+      medicines: {
+        Row: {
+          category: Database["public"]["Enums"]["medicine_category"]
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          in_stock: boolean | null
+          name: string
+          price: number
+          requires_prescription: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["medicine_category"]
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          in_stock?: boolean | null
+          name: string
+          price: number
+          requires_prescription?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["medicine_category"]
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          in_stock?: boolean | null
+          name?: string
+          price?: number
+          requires_prescription?: boolean | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       prescriptions: {
         Row: {
           created_at: string
@@ -214,6 +285,15 @@ export type Database = {
         | "completed"
         | "rejected"
       medical_need_urgency: "low" | "medium" | "high" | "critical"
+      medicine_category:
+        | "pain_relief"
+        | "cold_and_flu"
+        | "digestive_health"
+        | "first_aid"
+        | "vitamins"
+        | "diabetes"
+        | "heart_health"
+        | "skin_care"
       prescription_status: "pending" | "verified" | "rejected"
     }
     CompositeTypes: {

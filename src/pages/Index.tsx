@@ -1,7 +1,7 @@
 import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Heart, Users, Search, Calendar, Plus, MapPin, Clock } from "lucide-react";
+import { Heart, Users, Search, Calendar, Plus, MapPin, Clock, ShoppingCart, Package } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -62,6 +62,62 @@ const Index = () => {
       return needsWithProfiles;
     },
   });
+
+  // Add new query for medicines
+  const { data: medicines, isLoading: isLoadingMedicines } = useQuery({
+    queryKey: ['medicines'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('medicines')
+        .select('*');
+      
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Add cart functionality
+  const [cartItems, setCartItems] = useState<Record<string, number>>({});
+
+  const addToCart = async (medicineId: string) => {
+    if (!user) {
+      toast({
+        title: "Please sign in",
+        description: "You need to be signed in to add items to cart",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('cart_items')
+        .upsert({
+          user_id: user.id,
+          medicine_id: medicineId,
+          quantity: (cartItems[medicineId] || 0) + 1
+        });
+
+      if (error) throw error;
+
+      setCartItems(prev => ({
+        ...prev,
+        [medicineId]: (prev[medicineId] || 0) + 1
+      }));
+
+      toast({
+        title: "Added to cart",
+        description: "Item has been added to your cart",
+      });
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add item to cart",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-primary-50 to-white">
@@ -203,6 +259,63 @@ const Index = () => {
           </div>
         </section>
       )}
+
+      {/* Add Medical Store Section before Features Section */}
+      <section className="py-20 px-4 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex justify-between items-center mb-12">
+            <h2 className="text-3xl font-bold">Medical Store</h2>
+            <Button asChild>
+              <Link to="/medical-store">View All Products</Link>
+            </Button>
+          </div>
+
+          {isLoadingMedicines ? (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
+              <p className="mt-4 text-gray-600">Loading products...</p>
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {medicines?.slice(0, 4).map((medicine) => (
+                <Card key={medicine.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                  <div className="p-4">
+                    {medicine.image_url ? (
+                      <img
+                        src={medicine.image_url}
+                        alt={medicine.name}
+                        className="w-full h-48 object-cover rounded-md mb-4"
+                      />
+                    ) : (
+                      <div className="w-full h-48 bg-gray-100 rounded-md mb-4 flex items-center justify-center">
+                        <Package className="h-12 w-12 text-gray-400" />
+                      </div>
+                    )}
+                    <div className="space-y-2">
+                      <h3 className="text-lg font-semibold">{medicine.name}</h3>
+                      <p className="text-sm text-gray-600 line-clamp-2">{medicine.description}</p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-lg font-bold">${medicine.price}</span>
+                        <Badge variant={medicine.in_stock ? "default" : "secondary"}>
+                          {medicine.in_stock ? "In Stock" : "Out of Stock"}
+                        </Badge>
+                      </div>
+                      <Button 
+                        onClick={() => addToCart(medicine.id)}
+                        disabled={!medicine.in_stock}
+                        className="w-full"
+                      >
+                        <ShoppingCart className="mr-2 h-4 w-4" />
+                        Add to Cart
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
 
       {/* Features Section */}
       <section className="py-20 px-4 bg-gray-50">

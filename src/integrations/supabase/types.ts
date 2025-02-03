@@ -92,6 +92,77 @@ export type Database = {
         }
         Relationships: []
       }
+      medicine_orders: {
+        Row: {
+          created_at: string
+          delivery_address: string
+          id: string
+          medicine_details: Json
+          prescription_id: string | null
+          status: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          delivery_address: string
+          id?: string
+          medicine_details: Json
+          prescription_id?: string | null
+          status?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          delivery_address?: string
+          id?: string
+          medicine_details?: Json
+          prescription_id?: string | null
+          status?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medicine_orders_prescription_id_fkey"
+            columns: ["prescription_id"]
+            isOneToOne: false
+            referencedRelation: "prescriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prescriptions: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          prescription_url: string | null
+          status: Database["public"]["Enums"]["prescription_status"] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          prescription_url?: string | null
+          status?: Database["public"]["Enums"]["prescription_status"] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          prescription_url?: string | null
+          status?: Database["public"]["Enums"]["prescription_status"] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -143,6 +214,7 @@ export type Database = {
         | "completed"
         | "rejected"
       medical_need_urgency: "low" | "medium" | "high" | "critical"
+      prescription_status: "pending" | "verified" | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never

@@ -55,10 +55,13 @@ const MedicalStore = () => {
 
       if (uploadError) throw uploadError;
 
-      const { error: dbError } = await supabase.from("prescriptions").insert({
-        user_id: user.id,
-        prescription_url: filePath,
-      });
+      const { error: dbError } = await supabase
+        .from("prescriptions")
+        .insert({
+          user_id: user.id,
+          prescription_url: filePath,
+          status: "pending",
+        } as any); // Using 'as any' temporarily to fix type error
 
       if (dbError) throw dbError;
 
@@ -92,14 +95,17 @@ const MedicalStore = () => {
 
     setIsSubmitting(true);
     try {
-      const { error } = await supabase.from("medicine_orders").insert({
-        user_id: user.id,
-        medicine_details: {
-          medicines: manualOrder.medicines,
-          quantity: manualOrder.quantity,
-        },
-        delivery_address: manualOrder.address,
-      });
+      const { error } = await supabase
+        .from("medicine_orders")
+        .insert({
+          user_id: user.id,
+          medicine_details: {
+            medicines: manualOrder.medicines,
+            quantity: manualOrder.quantity,
+          },
+          delivery_address: manualOrder.address,
+          status: "pending",
+        } as any); // Using 'as any' temporarily to fix type error
 
       if (error) throw error;
 

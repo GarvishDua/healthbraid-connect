@@ -2,13 +2,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
 import { Loader2 } from "lucide-react";
+import { Tables } from "@/integrations/supabase/types";
 
 interface TimeSlotSelectionProps {
   selectedDate: Date | undefined;
   onSelectDate: (date: Date | undefined) => void;
   selectedTime: string | null;
   onSelectTime: (time: string) => void;
-  availability: { time_slots: string[] } | null;
+  availability: Tables<"doctor_availability"> | null;
   isLoadingAvailability: boolean;
   onBookAppointment: () => void;
 }
@@ -22,6 +23,8 @@ export const TimeSlotSelection = ({
   isLoadingAvailability,
   onBookAppointment,
 }: TimeSlotSelectionProps) => {
+  const timeSlots = availability?.time_slots as string[] | undefined;
+
   return (
     <div>
       <h2 className="text-xl font-semibold mb-4">Select Date & Time</h2>
@@ -40,9 +43,9 @@ export const TimeSlotSelection = ({
               <h3 className="text-lg font-semibold mb-3">Available Time Slots</h3>
               {isLoadingAvailability ? (
                 <Loader2 className="h-6 w-6 animate-spin" />
-              ) : availability?.time_slots ? (
+              ) : timeSlots ? (
                 <div className="grid grid-cols-3 gap-2">
-                  {availability.time_slots.map((time: string) => (
+                  {timeSlots.map((time: string) => (
                     <Button
                       key={time}
                       variant={selectedTime === time ? "default" : "outline"}

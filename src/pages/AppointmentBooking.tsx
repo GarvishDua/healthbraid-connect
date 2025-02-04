@@ -16,15 +16,6 @@ const AppointmentBooking = () => {
   const [selectedDoctor, setSelectedDoctor] = useState<string | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
 
-  const { data: hospitals, isLoading: isLoadingHospitals } = useQuery({
-    queryKey: ["hospitals"],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("hospitals").select("*");
-      if (error) throw error;
-      return data;
-    },
-  });
-
   const { data: doctors, isLoading: isLoadingDoctors } = useQuery({
     queryKey: ["doctors"],
     queryFn: async () => {
@@ -32,10 +23,7 @@ const AppointmentBooking = () => {
         .from("doctors")
         .select(`
           *,
-          hospitals (
-            name,
-            location
-          )
+          hospitals (*)
         `);
       if (error) throw error;
       return data;
@@ -53,7 +41,7 @@ const AppointmentBooking = () => {
         .eq("date", format(selectedDate!, "yyyy-MM-dd"))
         .maybeSingle();
 
-      if (error && error.code !== "PGRST116") throw error;
+      if (error) throw error;
       return data;
     },
   });
@@ -99,7 +87,7 @@ const AppointmentBooking = () => {
     }
   };
 
-  if (isLoadingHospitals || isLoadingDoctors) {
+  if (isLoadingDoctors) {
     return (
       <div className="min-h-screen bg-gray-50">
         <Navigation />

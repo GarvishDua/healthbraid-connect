@@ -54,7 +54,8 @@ const AppointmentBooking = () => {
         .select("*")
         .eq("doctor_id", selectedDoctor)
         .eq("date", format(selectedDate!, "yyyy-MM-dd"))
-        .single();
+        .maybeSingle(); // Changed from .single() to .maybeSingle()
+      
       if (error && error.code !== "PGRST116") throw error;
       return data;
     },
@@ -128,7 +129,7 @@ const AppointmentBooking = () => {
                 <Card 
                   key={doctor.id}
                   className={`cursor-pointer transition-colors ${
-                    selectedDoctor === doctor.id ? "border-primary-500" : ""
+                    selectedDoctor === doctor.id ? "border-primary" : ""
                   }`}
                   onClick={() => setSelectedDoctor(doctor.id)}
                 >
@@ -165,9 +166,9 @@ const AppointmentBooking = () => {
                     <h3 className="text-lg font-semibold mb-3">Available Time Slots</h3>
                     {isLoadingAvailability ? (
                       <Loader2 className="h-6 w-6 animate-spin" />
-                    ) : availability?.time_slots?.length > 0 ? (
+                    ) : availability?.time_slots ? (
                       <div className="grid grid-cols-3 gap-2">
-                        {availability.time_slots.map((time: string) => (
+                        {(availability.time_slots as string[]).map((time: string) => (
                           <Button
                             key={time}
                             variant={selectedTime === time ? "default" : "outline"}

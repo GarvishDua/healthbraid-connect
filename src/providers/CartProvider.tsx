@@ -54,7 +54,20 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
         .eq('user_id', user.id);
 
       if (error) throw error;
-      setItems(data || []);
+      
+      // Ensure the data matches the CartItem type
+      const typedData = (data || []).map((item: any) => ({
+        id: item.id,
+        medicine_id: item.medicine_id,
+        quantity: item.quantity,
+        medicine: {
+          name: item.medicine.name,
+          price: item.medicine.price,
+          image_url: item.medicine.image_url,
+        },
+      }));
+      
+      setItems(typedData);
     } catch (error) {
       console.error('Error fetching cart:', error);
       toast({

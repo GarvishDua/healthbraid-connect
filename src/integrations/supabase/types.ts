@@ -9,6 +9,57 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      appointments: {
+        Row: {
+          appointment_date: string
+          appointment_time: string
+          created_at: string
+          doctor_id: string | null
+          hospital_id: string | null
+          id: string
+          status: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          appointment_date: string
+          appointment_time: string
+          created_at?: string
+          doctor_id?: string | null
+          hospital_id?: string | null
+          id?: string
+          status?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          appointment_date?: string
+          appointment_time?: string
+          created_at?: string
+          doctor_id?: string | null
+          hospital_id?: string | null
+          id?: string
+          status?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "hospitals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cart_items: {
         Row: {
           created_at: string
@@ -37,6 +88,85 @@ export type Database = {
             columns: ["medicine_id"]
             isOneToOne: false
             referencedRelation: "medicines"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      doctor_availability: {
+        Row: {
+          created_at: string
+          date: string
+          doctor_id: string | null
+          id: string
+          is_available: boolean | null
+          time_slots: Json
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          doctor_id?: string | null
+          id?: string
+          is_available?: boolean | null
+          time_slots: Json
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          doctor_id?: string | null
+          id?: string
+          is_available?: boolean | null
+          time_slots?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "doctor_availability_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      doctors: {
+        Row: {
+          consultation_fee: number
+          created_at: string
+          hospital_id: string | null
+          id: string
+          image_url: string | null
+          name: string
+          specialty: Database["public"]["Enums"]["doctor_specialty"]
+          updated_at: string
+        }
+        Insert: {
+          consultation_fee: number
+          created_at?: string
+          hospital_id?: string | null
+          id?: string
+          image_url?: string | null
+          name: string
+          specialty: Database["public"]["Enums"]["doctor_specialty"]
+          updated_at?: string
+        }
+        Update: {
+          consultation_fee?: number
+          created_at?: string
+          hospital_id?: string | null
+          id?: string
+          image_url?: string | null
+          name?: string
+          specialty?: Database["public"]["Enums"]["doctor_specialty"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "doctors_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "hospitals"
             referencedColumns: ["id"]
           },
         ]
@@ -78,6 +208,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      hospitals: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          location: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          location: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          location?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       medical_needs: {
         Row: {
@@ -255,145 +415,20 @@ export type Database = {
           last_name?: string | null
           location?: string | null
           phone?: string | null
-          updated_at: string
+          updated_at?: string
         }
         Update: {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
           first_name?: string | null
-          id: string
+          id?: string
           last_name?: string | null
           location?: string | null
           phone?: string | null
           updated_at?: string
         }
         Relationships: []
-      }
-      hospitals: {
-        Row: {
-          id: string
-          name: string
-          location: string
-          description: string | null
-          image_url: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          name: string
-          location: string
-          description?: string | null
-          image_url?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          name?: string
-          location?: string
-          description?: string | null
-          image_url?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-      }
-      doctors: {
-        Row: {
-          id: string
-          hospital_id: string | null
-          name: string
-          specialty: Database["public"]["Enums"]["doctor_specialty"]
-          consultation_fee: number
-          image_url: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          hospital_id?: string | null
-          name: string
-          specialty: Database["public"]["Enums"]["doctor_specialty"]
-          consultation_fee: number
-          image_url?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          hospital_id?: string | null
-          name?: string
-          specialty?: Database["public"]["Enums"]["doctor_specialty"]
-          consultation_fee?: number
-          image_url?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-      }
-      doctor_availability: {
-        Row: {
-          id: string
-          doctor_id: string | null
-          date: string
-          time_slots: Json
-          is_available: boolean | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          doctor_id?: string | null
-          date: string
-          time_slots: Json
-          is_available?: boolean | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          doctor_id?: string | null
-          date?: string
-          time_slots?: Json
-          is_available?: boolean | null
-          created_at?: string
-          updated_at?: string
-        }
-      }
-      appointments: {
-        Row: {
-          id: string
-          user_id: string | null
-          doctor_id: string | null
-          hospital_id: string | null
-          appointment_date: string
-          appointment_time: string
-          status: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          user_id?: string | null
-          doctor_id?: string | null
-          hospital_id?: string | null
-          appointment_date: string
-          appointment_time: string
-          status?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string | null
-          doctor_id?: string | null
-          hospital_id?: string | null
-          appointment_date?: string
-          appointment_time?: string
-          status?: string | null
-          created_at?: string
-          updated_at?: string
-        }
       }
     }
     Views: {
@@ -403,6 +438,13 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      doctor_specialty:
+        | "general_physician"
+        | "cardiologist"
+        | "dermatologist"
+        | "pediatrician"
+        | "orthopedic"
+        | "neurologist"
       medical_need_status:
         | "pending"
         | "verified"
@@ -420,7 +462,6 @@ export type Database = {
         | "heart_health"
         | "skin_care"
       prescription_status: "pending" | "verified" | "rejected"
-      doctor_specialty: "general_physician" | "cardiologist" | "dermatologist" | "pediatrician" | "orthopedic" | "neurologist"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -437,7 +478,7 @@ export type Tables<
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
     ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
         Database[PublicTableNameOrOptions["schema"]]["Views"])
-    : never,
+    : never = never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
       Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
@@ -449,10 +490,10 @@ export type Tables<
         PublicSchema["Views"])
     ? (PublicSchema["Tables"] &
         PublicSchema["Views"])[PublicTableNameOrOptions] extends {
-      Row: infer R
-    }
-    ? R
-    : never
+        Row: infer R
+      }
+      ? R
+      : never
     : never
 
 export type TablesInsert<

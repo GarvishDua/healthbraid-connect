@@ -26,6 +26,7 @@ export const Navigation = () => {
                 <Link to="/find-help">Find Help</Link>
                 <Link to="/give-help">Give Help</Link>
                 <Link to="/ai-assistant">AI Assistant</Link>
+                <Link to="/book-appointment">Book Appointment</Link>
                 <Link to="/cart" className="relative">
                   <Button variant="ghost" size="icon">
                     <ShoppingCart className="h-5 w-5" />

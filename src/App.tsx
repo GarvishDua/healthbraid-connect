@@ -18,6 +18,7 @@ import AIAssistant from "./pages/AIAssistant";
 import VolunteerLocally from "./pages/VolunteerLocally";
 import OrganizeFundraisers from "./pages/OrganizeFundraisers";
 import MedicalStore from "./pages/MedicalStore";
+import AppointmentBooking from "./pages/AppointmentBooking";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +43,7 @@ const App = () => (
               <Route path="/volunteer" element={<VolunteerLocally />} />
               <Route path="/create-fundraiser" element={<OrganizeFundraisers />} />
               <Route path="/medical-store" element={<MedicalStore />} />
+              <Route path="/book-appointment" element={<AppointmentBooking />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

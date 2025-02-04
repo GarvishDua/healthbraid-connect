@@ -255,20 +255,145 @@ export type Database = {
           last_name?: string | null
           location?: string | null
           phone?: string | null
-          updated_at?: string
+          updated_at: string
         }
         Update: {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
           first_name?: string | null
-          id?: string
+          id: string
           last_name?: string | null
           location?: string | null
           phone?: string | null
           updated_at?: string
         }
         Relationships: []
+      }
+      hospitals: {
+        Row: {
+          id: string
+          name: string
+          location: string
+          description: string | null
+          image_url: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          location: string
+          description?: string | null
+          image_url?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          location?: string
+          description?: string | null
+          image_url?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      doctors: {
+        Row: {
+          id: string
+          hospital_id: string | null
+          name: string
+          specialty: Database["public"]["Enums"]["doctor_specialty"]
+          consultation_fee: number
+          image_url: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          hospital_id?: string | null
+          name: string
+          specialty: Database["public"]["Enums"]["doctor_specialty"]
+          consultation_fee: number
+          image_url?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          hospital_id?: string | null
+          name?: string
+          specialty?: Database["public"]["Enums"]["doctor_specialty"]
+          consultation_fee?: number
+          image_url?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      doctor_availability: {
+        Row: {
+          id: string
+          doctor_id: string | null
+          date: string
+          time_slots: Json
+          is_available: boolean | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          doctor_id?: string | null
+          date: string
+          time_slots: Json
+          is_available?: boolean | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          doctor_id?: string | null
+          date?: string
+          time_slots?: Json
+          is_available?: boolean | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      appointments: {
+        Row: {
+          id: string
+          user_id: string | null
+          doctor_id: string | null
+          hospital_id: string | null
+          appointment_date: string
+          appointment_time: string
+          status: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id?: string | null
+          doctor_id?: string | null
+          hospital_id?: string | null
+          appointment_date: string
+          appointment_time: string
+          status?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string | null
+          doctor_id?: string | null
+          hospital_id?: string | null
+          appointment_date?: string
+          appointment_time?: string
+          status?: string | null
+          created_at?: string
+          updated_at?: string
+        }
       }
     }
     Views: {
@@ -295,6 +420,7 @@ export type Database = {
         | "heart_health"
         | "skin_care"
       prescription_status: "pending" | "verified" | "rejected"
+      doctor_specialty: "general_physician" | "cardiologist" | "dermatologist" | "pediatrician" | "orthopedic" | "neurologist"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -311,7 +437,7 @@ export type Tables<
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
     ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
         Database[PublicTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
       Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
@@ -323,10 +449,10 @@ export type Tables<
         PublicSchema["Views"])
     ? (PublicSchema["Tables"] &
         PublicSchema["Views"])[PublicTableNameOrOptions] extends {
-        Row: infer R
-      }
-      ? R
-      : never
+      Row: infer R
+    }
+    ? R
+    : never
     : never
 
 export type TablesInsert<

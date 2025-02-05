@@ -55,7 +55,6 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (error) throw error;
       
-      // Ensure the data matches the CartItem type
       const typedData = (data || []).map((item: any) => ({
         id: item.id,
         medicine_id: item.medicine_id,
@@ -135,18 +134,9 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (error) throw error;
       await fetchCart();
-
-      toast({
-        title: "Removed from cart",
-        description: "Item has been removed from your cart",
-      });
     } catch (error) {
       console.error('Error removing from cart:', error);
-      toast({
-        title: "Error",
-        description: "Failed to remove item from cart",
-        variant: "destructive",
-      });
+      throw error;
     }
   };
 
@@ -169,11 +159,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
       await fetchCart();
     } catch (error) {
       console.error('Error updating quantity:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update quantity",
-        variant: "destructive",
-      });
+      throw error;
     }
   };
 

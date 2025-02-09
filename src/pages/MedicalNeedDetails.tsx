@@ -14,11 +14,15 @@ const MedicalNeedDetails = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const { data: medicalNeed, isLoading } = useQuery({
+  const { data: medicalNeed, isLoading, error } = useQuery({
     queryKey: ['medicalNeed', needId],
     queryFn: async () => {
-      console.log('Fetching medical need details...');
+      console.log('Fetching medical need details...', needId);
       
+      if (!needId) {
+        throw new Error('No need ID provided');
+      }
+
       // First, fetch the medical need
       const { data: need, error: needError } = await supabase
         .from('medical_needs')
@@ -56,6 +60,8 @@ const MedicalNeedDetails = () => {
       console.log('Medical need with profile:', needWithProfile);
       return needWithProfile;
     },
+    retry: 1,
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   });
 
   if (isLoading) {
@@ -69,12 +75,41 @@ const MedicalNeedDetails = () => {
     );
   }
 
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navigation />
+        <div className="max-w-4xl mx-auto px-4 py-12">
+          <div className="text-center text-red-600">
+            Error loading medical need details. Please try again later.
+          </div>
+          <Button
+            variant="outline"
+            className="mt-4"
+            onClick={() => navigate('/find-help')}
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Find Help
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   if (!medicalNeed) {
     return (
       <div className="min-h-screen bg-gray-50">
         <Navigation />
         <div className="max-w-4xl mx-auto px-4 py-12">
           <div className="text-center">Medical need not found</div>
+          <Button
+            variant="outline"
+            className="mt-4"
+            onClick={() => navigate('/find-help')}
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Find Help
+          </Button>
         </div>
       </div>
     );

@@ -95,11 +95,28 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     try {
-      // Find if the item already exists in the cart
+      // Using upsert with the ON CONFLICT DO UPDATE syntax
+      const { error } = await supabase
+        .from('cart_items')
+        .upsert(
+          {
+            user_id: user.id,
+            medicine_id: medicineId,
+            quantity: 1
+          },
+          {
+            onConflict: 'user_id,medicine_id',
+            ignoreDuplicates: false
+          }
+        )
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // After successful upsert, increment the quantity
       const existingItem = items.find(item => item.medicine_id === medicineId);
-      
       if (existingItem) {
-        // If it exists, update the quantity
         const { error: updateError } = await supabase
           .from('cart_items')
           .update({ quantity: existingItem.quantity + 1 })
@@ -107,17 +124,6 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
           .eq('medicine_id', medicineId);
 
         if (updateError) throw updateError;
-      } else {
-        // If it doesn't exist, insert new item
-        const { error: insertError } = await supabase
-          .from('cart_items')
-          .insert({
-            user_id: user.id,
-            medicine_id: medicineId,
-            quantity: 1,
-          });
-
-        if (insertError) throw insertError;
       }
 
       await fetchCart();

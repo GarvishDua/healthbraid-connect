@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./AuthProvider";
@@ -94,34 +95,13 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     try {
-      const { data: existingItem, error: queryError } = await supabase
-        .from('cart_items')
-        .select('quantity')
-        .eq('user_id', user.id)
-        .eq('medicine_id', medicineId)
-        .maybeSingle();
+      // Use the new RPC function to handle cart item addition
+      const { error } = await supabase.rpc('increment_cart_item', {
+        p_user_id: user.id,
+        p_medicine_id: medicineId
+      });
 
-      if (queryError) throw queryError;
-
-      if (existingItem) {
-        const { error: updateError } = await supabase
-          .from('cart_items')
-          .update({ quantity: existingItem.quantity + 1 })
-          .eq('user_id', user.id)
-          .eq('medicine_id', medicineId);
-
-        if (updateError) throw updateError;
-      } else {
-        const { error: insertError } = await supabase
-          .from('cart_items')
-          .insert({
-            user_id: user.id,
-            medicine_id: medicineId,
-            quantity: 1
-          });
-
-        if (insertError) throw insertError;
-      }
+      if (error) throw error;
 
       await fetchCart();
       

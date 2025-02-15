@@ -95,12 +95,35 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     try {
-      const { error } = await supabase.rpc('increment_cart_item', {
-        p_user_id: user.id,
-        p_medicine_id: medicineId,
-      } as { p_user_id: string; p_medicine_id: string });
+      // First check if the item exists in the cart
+      const { data: existingItem } = await supabase
+        .from('cart_items')
+        .select('quantity')
+        .eq('user_id', user.id)
+        .eq('medicine_id', medicineId)
+        .single();
 
-      if (error) throw error;
+      if (existingItem) {
+        // If item exists, update the quantity
+        const { error: updateError } = await supabase
+          .from('cart_items')
+          .update({ quantity: existingItem.quantity + 1 })
+          .eq('user_id', user.id)
+          .eq('medicine_id', medicineId);
+
+        if (updateError) throw updateError;
+      } else {
+        // If item doesn't exist, insert new item
+        const { error: insertError } = await supabase
+          .from('cart_items')
+          .insert({
+            user_id: user.id,
+            medicine_id: medicineId,
+            quantity: 1
+          });
+
+        if (insertError) throw insertError;
+      }
 
       await fetchCart();
       

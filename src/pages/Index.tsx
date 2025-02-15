@@ -9,7 +9,7 @@ import { useAuth } from "@/providers/AuthProvider";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { useState } from 'react';
+import { useCart } from "@/providers/CartProvider";
 
 // Helper function to determine urgency color
 const getUrgencyColor = (urgency: string) => {
@@ -28,7 +28,7 @@ const getUrgencyColor = (urgency: string) => {
 const Index = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [cartItems, setCartItems] = useState<Record<string, number>>({});
+  const { addItem } = useCart();
 
   const { data: medicalNeeds, isLoading: isLoadingNeeds } = useQuery({
     queryKey: ['medicalNeeds'],
@@ -65,7 +65,6 @@ const Index = () => {
     },
   });
 
-  // Add new query for medicines
   const { data: medicines, isLoading: isLoadingMedicines } = useQuery({
     queryKey: ['medicines'],
     queryFn: async () => {
@@ -78,7 +77,7 @@ const Index = () => {
     },
   });
 
-  const addToCart = async (medicineId: string) => {
+  const handleAddToCart = async (medicineId: string) => {
     if (!user) {
       toast({
         title: "Please sign in",
@@ -89,25 +88,7 @@ const Index = () => {
     }
 
     try {
-      const { error } = await supabase
-        .from('cart_items')
-        .upsert({
-          user_id: user.id,
-          medicine_id: medicineId,
-          quantity: (cartItems[medicineId] || 0) + 1
-        });
-
-      if (error) throw error;
-
-      setCartItems(prev => ({
-        ...prev,
-        [medicineId]: (prev[medicineId] || 0) + 1
-      }));
-
-      toast({
-        title: "Added to cart",
-        description: "Item has been added to your cart",
-      });
+      await addItem(medicineId);
     } catch (error) {
       console.error('Error adding to cart:', error);
       toast({
@@ -259,7 +240,7 @@ const Index = () => {
         </section>
       )}
 
-      {/* Add Medical Store Section before Features Section */}
+      {/* Medical Store Section */}
       <section className="py-20 px-4 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-center mb-12">
@@ -300,7 +281,7 @@ const Index = () => {
                         </Badge>
                       </div>
                       <Button 
-                        onClick={() => addToCart(medicine.id)}
+                        onClick={() => handleAddToCart(medicine.id)}
                         disabled={!medicine.in_stock}
                         className="w-full"
                       >

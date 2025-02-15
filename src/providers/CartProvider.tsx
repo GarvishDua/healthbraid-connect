@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./AuthProvider";
@@ -95,16 +94,16 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     try {
-      // First check if the item exists in the cart
-      const { data: existingItem } = await supabase
+      const { data: existingItem, error: queryError } = await supabase
         .from('cart_items')
         .select('quantity')
         .eq('user_id', user.id)
         .eq('medicine_id', medicineId)
-        .single();
+        .maybeSingle();
+
+      if (queryError) throw queryError;
 
       if (existingItem) {
-        // If item exists, update the quantity
         const { error: updateError } = await supabase
           .from('cart_items')
           .update({ quantity: existingItem.quantity + 1 })
@@ -113,7 +112,6 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
 
         if (updateError) throw updateError;
       } else {
-        // If item doesn't exist, insert new item
         const { error: insertError } = await supabase
           .from('cart_items')
           .insert({

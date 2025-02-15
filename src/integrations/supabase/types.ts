@@ -435,7 +435,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      increment_cart_item: {
+        Args: {
+          p_user_id: string
+          p_medicine_id: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       doctor_specialty:

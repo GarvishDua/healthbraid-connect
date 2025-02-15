@@ -95,10 +95,10 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     try {
-      const { data, error } = await supabase.rpc('increment_cart_item', {
+      const { error } = await supabase.rpc('increment_cart_item', {
         p_user_id: user.id,
-        p_medicine_id: medicineId
-      });
+        p_medicine_id: medicineId,
+      } as { p_user_id: string; p_medicine_id: string });
 
       if (error) throw error;
 

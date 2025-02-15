@@ -95,49 +95,19 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     try {
-      // First try to get the existing item
-      const { data: existingItems, error: fetchError } = await supabase
-        .from('cart_items')
-        .select('quantity')
-        .eq('user_id', user.id)
-        .eq('medicine_id', medicineId)
-        .maybeSingle();
+      const { data, error } = await supabase.rpc('increment_cart_item', {
+        p_user_id: user.id,
+        p_medicine_id: medicineId
+      });
 
-      if (fetchError) throw fetchError;
-
-      if (existingItems) {
-        // If item exists, update quantity
-        const { error: updateError } = await supabase
-          .from('cart_items')
-          .update({ quantity: existingItems.quantity + 1 })
-          .eq('user_id', user.id)
-          .eq('medicine_id', medicineId);
-
-        if (updateError) throw updateError;
-
-        toast({
-          title: "Added to cart",
-          description: "Item quantity increased",
-        });
-      } else {
-        // If item doesn't exist, insert new item
-        const { error: insertError } = await supabase
-          .from('cart_items')
-          .insert({
-            user_id: user.id,
-            medicine_id: medicineId,
-            quantity: 1,
-          });
-
-        if (insertError) throw insertError;
-
-        toast({
-          title: "Added to cart",
-          description: "Item has been added to your cart",
-        });
-      }
+      if (error) throw error;
 
       await fetchCart();
+      
+      toast({
+        title: "Added to cart",
+        description: "Item has been added to your cart",
+      });
     } catch (error) {
       console.error('Error adding to cart:', error);
       toast({

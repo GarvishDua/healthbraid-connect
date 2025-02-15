@@ -95,43 +95,49 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     try {
-      // Using upsert with the ON CONFLICT DO UPDATE syntax
-      const { error } = await supabase
+      // First try to get the existing item
+      const { data: existingItems, error: fetchError } = await supabase
         .from('cart_items')
-        .upsert(
-          {
-            user_id: user.id,
-            medicine_id: medicineId,
-            quantity: 1
-          },
-          {
-            onConflict: 'user_id,medicine_id',
-            ignoreDuplicates: false
-          }
-        )
-        .select()
-        .single();
+        .select('quantity')
+        .eq('user_id', user.id)
+        .eq('medicine_id', medicineId)
+        .maybeSingle();
 
-      if (error) throw error;
+      if (fetchError) throw fetchError;
 
-      // After successful upsert, increment the quantity
-      const existingItem = items.find(item => item.medicine_id === medicineId);
-      if (existingItem) {
+      if (existingItems) {
+        // If item exists, update quantity
         const { error: updateError } = await supabase
           .from('cart_items')
-          .update({ quantity: existingItem.quantity + 1 })
+          .update({ quantity: existingItems.quantity + 1 })
           .eq('user_id', user.id)
           .eq('medicine_id', medicineId);
 
         if (updateError) throw updateError;
+
+        toast({
+          title: "Added to cart",
+          description: "Item quantity increased",
+        });
+      } else {
+        // If item doesn't exist, insert new item
+        const { error: insertError } = await supabase
+          .from('cart_items')
+          .insert({
+            user_id: user.id,
+            medicine_id: medicineId,
+            quantity: 1,
+          });
+
+        if (insertError) throw insertError;
+
+        toast({
+          title: "Added to cart",
+          description: "Item has been added to your cart",
+        });
       }
 
       await fetchCart();
-      
-      toast({
-        title: "Added to cart",
-        description: existingItem ? "Item quantity increased" : "Item has been added to your cart",
-      });
     } catch (error) {
       console.error('Error adding to cart:', error);
       toast({

@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./AuthProvider";
@@ -94,23 +95,36 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     try {
+      // Find if the item already exists in the cart
       const existingItem = items.find(item => item.medicine_id === medicineId);
-      const newQuantity = existingItem ? existingItem.quantity + 1 : 1;
+      
+      if (existingItem) {
+        // If it exists, update the quantity
+        const { error: updateError } = await supabase
+          .from('cart_items')
+          .update({ quantity: existingItem.quantity + 1 })
+          .eq('user_id', user.id)
+          .eq('medicine_id', medicineId);
 
-      const { error } = await supabase
-        .from('cart_items')
-        .upsert({
-          user_id: user.id,
-          medicine_id: medicineId,
-          quantity: newQuantity,
-        });
+        if (updateError) throw updateError;
+      } else {
+        // If it doesn't exist, insert new item
+        const { error: insertError } = await supabase
+          .from('cart_items')
+          .insert({
+            user_id: user.id,
+            medicine_id: medicineId,
+            quantity: 1,
+          });
 
-      if (error) throw error;
+        if (insertError) throw insertError;
+      }
+
       await fetchCart();
       
       toast({
         title: "Added to cart",
-        description: "Item has been added to your cart",
+        description: existingItem ? "Item quantity increased" : "Item has been added to your cart",
       });
     } catch (error) {
       console.error('Error adding to cart:', error);

@@ -214,7 +214,7 @@ const Index = () => {
               </div>
             )}
           </div>
-        </div>
+        </section>
       )}
 
       <section className="py-12 md:py-20 px-4 bg-white">

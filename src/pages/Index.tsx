@@ -1,3 +1,4 @@
+
 import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -338,11 +339,29 @@ const Index = () => {
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl font-bold mb-6">Ready to Make a Difference?</h2>
           <p className="text-xl mb-8">
-            Join our community of donors and healthcare providers helping those in need.
+            {user 
+              ? "Create a medical need or help others in our community."
+              : "Join our community of donors and healthcare providers helping those in need."
+            }
           </p>
-          <Button size="lg" variant="secondary" asChild className="bg-white text-primary-600 hover:bg-gray-100">
-            <Link to="/auth">Get Started Today</Link>
-          </Button>
+          {user ? (
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button size="lg" variant="secondary" asChild className="bg-white text-primary-600 hover:bg-gray-100">
+                <Link to="/create-need">
+                  <Plus className="mr-2 h-5 w-5" /> Create Medical Need
+                </Link>
+              </Button>
+              <Button size="lg" variant="outline" asChild className="bg-transparent text-white border-white hover:bg-white/10">
+                <Link to="/find-help">
+                  <Heart className="mr-2 h-5 w-5" /> Help Others
+                </Link>
+              </Button>
+            </div>
+          ) : (
+            <Button size="lg" variant="secondary" asChild className="bg-white text-primary-600 hover:bg-gray-100">
+              <Link to="/auth">Get Started Today</Link>
+            </Button>
+          )}
         </div>
       </section>
     </div>

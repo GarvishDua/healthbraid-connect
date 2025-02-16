@@ -1,4 +1,3 @@
-
 import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -12,7 +11,6 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useCart } from "@/providers/CartProvider";
 
-// Helper function to determine urgency color
 const getUrgencyColor = (urgency: string) => {
   switch (urgency.toLowerCase()) {
     case 'high':
@@ -104,31 +102,30 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-to-b from-primary-50 to-white">
       <Navigation />
       
-      {/* Hero Section */}
-      <section className="pt-20 pb-32 px-4 text-center">
-        <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
+      <section className="pt-10 md:pt-20 pb-16 md:pb-32 px-4 text-center">
+        <h1 className="text-3xl md:text-6xl font-bold text-gray-900 mb-4 md:mb-6 px-4">
           Bridging the Gap in
           <span className="text-primary-600"> Healthcare Access</span>
         </h1>
-        <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+        <p className="text-lg md:text-xl text-gray-600 mb-6 md:mb-8 max-w-2xl mx-auto px-4">
           Connect with donors, NGOs, and healthcare providers to receive the medical care you deserve.
         </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        <div className="flex flex-col sm:flex-row gap-4 justify-center px-4">
           {user ? (
             <>
-              <Button size="lg" asChild>
+              <Button size="lg" asChild className="w-full sm:w-auto">
                 <Link to="/create-need">
                   <Plus className="mr-2 h-5 w-5" /> Post Medical Need
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" asChild>
+              <Button size="lg" variant="outline" asChild className="w-full sm:w-auto">
                 <Link to="/ai-assistant">
                   <Search className="mr-2 h-5 w-5" /> AI Health Assistant
                 </Link>
               </Button>
             </>
           ) : (
-            <Button size="lg" asChild>
+            <Button size="lg" asChild className="w-full sm:w-auto">
               <Link to="/auth">
                 <Search className="mr-2 h-5 w-5" /> Sign In to Get Started
               </Link>
@@ -137,12 +134,11 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Medical Needs Section */}
-      {user ? (
-        <section className="py-20 px-4 bg-white">
+      {user && (
+        <section className="py-12 md:py-20 px-4 bg-white">
           <div className="max-w-7xl mx-auto">
-            <div className="flex justify-between items-center mb-12">
-              <h2 className="text-3xl font-bold">Current Medical Needs</h2>
+            <div className="flex flex-col sm:flex-row justify-between items-center mb-8 md:mb-12 gap-4">
+              <h2 className="text-2xl md:text-3xl font-bold text-center sm:text-left">Current Medical Needs</h2>
               <Button asChild>
                 <Link to="/find-help">View All Needs</Link>
               </Button>
@@ -154,32 +150,28 @@ const Index = () => {
                 <p className="mt-4 text-gray-600">Loading medical needs...</p>
               </div>
             ) : (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {medicalNeeds?.slice(0, 6).map((need) => (
                   <Card key={need.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                    <div className="p-6">
-                      <div className="flex items-start justify-between mb-4">
+                    <div className="p-4 md:p-6">
+                      <div className="flex items-start justify-between mb-4 flex-wrap gap-2">
                         <div>
-                          <h3 className="text-xl font-semibold mb-2">{need.title}</h3>
+                          <h3 className="text-lg md:text-xl font-semibold mb-2">{need.title}</h3>
                           <div className="flex items-center text-gray-600 text-sm mb-2">
-                            <MapPin className="h-4 w-4 mr-1" />
-                            <span>{need.location}</span>
+                            <MapPin className="h-4 w-4 mr-1 flex-shrink-0" />
+                            <span className="truncate">{need.location}</span>
                           </div>
                           <div className="flex items-center text-gray-600 text-sm">
-                            <Clock className="h-4 w-4 mr-1" />
-                            <span>Posted {new Date(need.created_at).toLocaleDateString('en-US', {
-                              year: 'numeric',
-                              month: 'long',
-                              day: 'numeric'
-                            })}</span>
+                            <Clock className="h-4 w-4 mr-1 flex-shrink-0" />
+                            <span>Posted {new Date(need.created_at).toLocaleDateString()}</span>
                           </div>
                         </div>
-                        <Badge className={`${getUrgencyColor(need.urgency)}`}>
+                        <Badge className={`${getUrgencyColor(need.urgency)} whitespace-nowrap`}>
                           {need.urgency}
                         </Badge>
                       </div>
                       
-                      <p className="text-gray-600 line-clamp-3 mb-4">{need.description}</p>
+                      <p className="text-gray-600 line-clamp-3 mb-4 text-sm md:text-base">{need.description}</p>
                       
                       <div className="space-y-4">
                         <div className="flex justify-between items-center text-sm">
@@ -192,7 +184,7 @@ const Index = () => {
                           value={(need.amount_raised / need.amount_needed) * 100} 
                           className="h-2"
                         />
-                        <div className="flex items-center justify-between pt-2">
+                        <div className="flex items-center justify-between pt-2 flex-wrap gap-2">
                           <div className="flex items-center">
                             {need.profile?.avatar_url ? (
                               <img 
@@ -209,7 +201,7 @@ const Index = () => {
                               {need.profile?.first_name} {need.profile?.last_name}
                             </span>
                           </div>
-                          <Button asChild>
+                          <Button asChild size="sm">
                             <Link to={`/need/${need.id}/donate`}>
                               <Heart className="mr-2 h-4 w-4" /> Help Now
                             </Link>
@@ -222,30 +214,13 @@ const Index = () => {
               </div>
             )}
           </div>
-        </section>
-      ) : (
-        <section className="py-20 px-4 bg-white">
-          <div className="max-w-7xl mx-auto text-center">
-            <Card className="p-8">
-              <h2 className="text-2xl font-bold mb-4">Sign In to View Medical Needs</h2>
-              <p className="text-gray-600 mb-6">
-                Join our community to view and support medical needs, or create your own fundraising campaign.
-              </p>
-              <Button size="lg" asChild>
-                <Link to="/auth">
-                  <Users className="mr-2 h-5 w-5" /> Sign In Now
-                </Link>
-              </Button>
-            </Card>
-          </div>
-        </section>
+        </div>
       )}
 
-      {/* Medical Store Section */}
-      <section className="py-20 px-4 bg-white">
+      <section className="py-12 md:py-20 px-4 bg-white">
         <div className="max-w-7xl mx-auto">
-          <div className="flex justify-between items-center mb-12">
-            <h2 className="text-3xl font-bold">Medical Store</h2>
+          <div className="flex flex-col sm:flex-row justify-between items-center mb-8 md:mb-12 gap-4">
+            <h2 className="text-2xl md:text-3xl font-bold text-center sm:text-left">Medical Store</h2>
             <Button asChild>
               <Link to="/medical-store">View All Products</Link>
             </Button>
@@ -257,7 +232,7 @@ const Index = () => {
               <p className="mt-4 text-gray-600">Loading products...</p>
             </div>
           ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {medicines?.slice(0, 4).map((medicine) => (
                 <Card key={medicine.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                   <div className="p-4">
@@ -265,17 +240,17 @@ const Index = () => {
                       <img
                         src={medicine.image_url}
                         alt={medicine.name}
-                        className="w-full h-48 object-cover rounded-md mb-4"
+                        className="w-full h-36 md:h-48 object-cover rounded-md mb-4"
                       />
                     ) : (
-                      <div className="w-full h-48 bg-gray-100 rounded-md mb-4 flex items-center justify-center">
+                      <div className="w-full h-36 md:h-48 bg-gray-100 rounded-md mb-4 flex items-center justify-center">
                         <Package className="h-12 w-12 text-gray-400" />
                       </div>
                     )}
                     <div className="space-y-2">
-                      <h3 className="text-lg font-semibold">{medicine.name}</h3>
+                      <h3 className="text-lg font-semibold line-clamp-1">{medicine.name}</h3>
                       <p className="text-sm text-gray-600 line-clamp-2">{medicine.description}</p>
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between flex-wrap gap-2">
                         <span className="text-lg font-bold">${medicine.price}</span>
                         <Badge variant={medicine.in_stock ? "default" : "secondary"}>
                           {medicine.in_stock ? "In Stock" : "Out of Stock"}
@@ -284,7 +259,7 @@ const Index = () => {
                       <Button 
                         onClick={() => handleAddToCart(medicine.id)}
                         disabled={!medicine.in_stock}
-                        className="w-full"
+                        className="w-full mt-2"
                       >
                         <ShoppingCart className="mr-2 h-4 w-4" />
                         Add to Cart
@@ -298,11 +273,10 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-20 px-4 bg-gray-50">
+      <section className="py-12 md:py-20 px-4 bg-gray-50">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-12">How HealthBridge Works</h2>
-          <div className="grid md:grid-cols-3 gap-8">
+          <h2 className="text-2xl md:text-3xl font-bold text-center mb-8 md:mb-12">How HealthBridge Works</h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             <Card className="p-6">
               <div className="rounded-full bg-primary-50 w-12 h-12 flex items-center justify-center mb-4">
                 <Users className="h-6 w-6 text-primary-600" />
@@ -334,11 +308,10 @@ const Index = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-20 px-4 bg-primary-600 text-white">
+      <section className="py-12 md:py-20 px-4 bg-primary-600 text-white">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-6">Ready to Make a Difference?</h2>
-          <p className="text-xl mb-8">
+          <h2 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6">Ready to Make a Difference?</h2>
+          <p className="text-lg md:text-xl mb-6 md:mb-8">
             {user 
               ? "Create a medical need or help others in our community."
               : "Join our community of donors and healthcare providers helping those in need."
@@ -346,19 +319,34 @@ const Index = () => {
           </p>
           {user ? (
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" variant="secondary" asChild className="bg-white text-primary-600 hover:bg-gray-100">
+              <Button 
+                size="lg" 
+                variant="secondary" 
+                asChild 
+                className="bg-white text-primary-600 hover:bg-gray-100 w-full sm:w-auto"
+              >
                 <Link to="/create-need">
                   <Plus className="mr-2 h-5 w-5" /> Create Medical Need
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" asChild className="bg-transparent text-white border-white hover:bg-white/10">
+              <Button 
+                size="lg" 
+                variant="outline" 
+                asChild 
+                className="bg-transparent text-white border-white hover:bg-white/10 w-full sm:w-auto"
+              >
                 <Link to="/find-help">
                   <Heart className="mr-2 h-5 w-5" /> Help Others
                 </Link>
               </Button>
             </div>
           ) : (
-            <Button size="lg" variant="secondary" asChild className="bg-white text-primary-600 hover:bg-gray-100">
+            <Button 
+              size="lg" 
+              variant="secondary" 
+              asChild 
+              className="bg-white text-primary-600 hover:bg-gray-100 w-full sm:w-auto"
+            >
               <Link to="/auth">Get Started Today</Link>
             </Button>
           )}

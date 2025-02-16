@@ -1,3 +1,4 @@
+
 import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -102,44 +103,48 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-to-b from-primary-50 to-white">
       <Navigation />
       
-      <section className="pt-10 md:pt-20 pb-16 md:pb-32 px-4 text-center">
-        <h1 className="text-3xl md:text-6xl font-bold text-gray-900 mb-4 md:mb-6 px-4">
-          Bridging the Gap in
-          <span className="text-primary-600"> Healthcare Access</span>
-        </h1>
-        <p className="text-lg md:text-xl text-gray-600 mb-6 md:mb-8 max-w-2xl mx-auto px-4">
-          Connect with donors, NGOs, and healthcare providers to receive the medical care you deserve.
-        </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center px-4">
-          {user ? (
-            <>
+      {/* Hero Section */}
+      <section className="pt-8 md:pt-16 lg:pt-20 pb-12 md:pb-24 lg:pb-32 px-4 md:px-8">
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4 md:mb-6">
+            Bridging the Gap in
+            <span className="text-primary-600 block sm:inline"> Healthcare Access</span>
+          </h1>
+          <p className="text-base sm:text-lg md:text-xl text-gray-600 mb-6 md:mb-8 max-w-2xl mx-auto">
+            Connect with donors, NGOs, and healthcare providers to receive the medical care you deserve.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            {user ? (
+              <>
+                <Button size="lg" asChild className="w-full sm:w-auto">
+                  <Link to="/create-need">
+                    <Plus className="mr-2 h-5 w-5" /> Post Medical Need
+                  </Link>
+                </Button>
+                <Button size="lg" variant="outline" asChild className="w-full sm:w-auto">
+                  <Link to="/ai-assistant">
+                    <Search className="mr-2 h-5 w-5" /> AI Health Assistant
+                  </Link>
+                </Button>
+              </>
+            ) : (
               <Button size="lg" asChild className="w-full sm:w-auto">
-                <Link to="/create-need">
-                  <Plus className="mr-2 h-5 w-5" /> Post Medical Need
+                <Link to="/auth">
+                  <Search className="mr-2 h-5 w-5" /> Sign In to Get Started
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" asChild className="w-full sm:w-auto">
-                <Link to="/ai-assistant">
-                  <Search className="mr-2 h-5 w-5" /> AI Health Assistant
-                </Link>
-              </Button>
-            </>
-          ) : (
-            <Button size="lg" asChild className="w-full sm:w-auto">
-              <Link to="/auth">
-                <Search className="mr-2 h-5 w-5" /> Sign In to Get Started
-              </Link>
-            </Button>
-          )}
+            )}
+          </div>
         </div>
       </section>
 
+      {/* Medical Needs Section */}
       {user && (
-        <section className="py-12 md:py-20 px-4 bg-white">
+        <section className="py-8 md:py-16 px-4 md:px-8 bg-white">
           <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col sm:flex-row justify-between items-center mb-8 md:mb-12 gap-4">
-              <h2 className="text-2xl md:text-3xl font-bold text-center sm:text-left">Current Medical Needs</h2>
-              <Button asChild>
+            <div className="flex flex-col sm:flex-row justify-between items-center mb-6 md:mb-10 gap-4">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center sm:text-left">Current Medical Needs</h2>
+              <Button asChild className="w-full sm:w-auto">
                 <Link to="/find-help">View All Needs</Link>
               </Button>
             </div>
@@ -150,13 +155,13 @@ const Index = () => {
                 <p className="mt-4 text-gray-600">Loading medical needs...</p>
               </div>
             ) : (
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 {medicalNeeds?.slice(0, 6).map((need) => (
                   <Card key={need.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                     <div className="p-4 md:p-6">
                       <div className="flex items-start justify-between mb-4 flex-wrap gap-2">
-                        <div>
-                          <h3 className="text-lg md:text-xl font-semibold mb-2">{need.title}</h3>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-base sm:text-lg md:text-xl font-semibold mb-2 truncate">{need.title}</h3>
                           <div className="flex items-center text-gray-600 text-sm mb-2">
                             <MapPin className="h-4 w-4 mr-1 flex-shrink-0" />
                             <span className="truncate">{need.location}</span>
@@ -166,12 +171,12 @@ const Index = () => {
                             <span>Posted {new Date(need.created_at).toLocaleDateString()}</span>
                           </div>
                         </div>
-                        <Badge className={`${getUrgencyColor(need.urgency)} whitespace-nowrap`}>
+                        <Badge className={`${getUrgencyColor(need.urgency)} whitespace-nowrap ml-2`}>
                           {need.urgency}
                         </Badge>
                       </div>
                       
-                      <p className="text-gray-600 line-clamp-3 mb-4 text-sm md:text-base">{need.description}</p>
+                      <p className="text-gray-600 line-clamp-3 mb-4 text-sm">{need.description}</p>
                       
                       <div className="space-y-4">
                         <div className="flex justify-between items-center text-sm">
@@ -185,23 +190,23 @@ const Index = () => {
                           className="h-2"
                         />
                         <div className="flex items-center justify-between pt-2 flex-wrap gap-2">
-                          <div className="flex items-center">
+                          <div className="flex items-center min-w-0">
                             {need.profile?.avatar_url ? (
                               <img 
                                 src={need.profile.avatar_url} 
                                 alt="Profile" 
-                                className="w-8 h-8 rounded-full mr-2"
+                                className="w-8 h-8 rounded-full mr-2 flex-shrink-0"
                               />
                             ) : (
-                              <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center mr-2">
+                              <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center mr-2 flex-shrink-0">
                                 <Users className="h-4 w-4 text-gray-500" />
                               </div>
                             )}
-                            <span className="text-sm text-gray-600">
+                            <span className="text-sm text-gray-600 truncate">
                               {need.profile?.first_name} {need.profile?.last_name}
                             </span>
                           </div>
-                          <Button asChild size="sm">
+                          <Button asChild size="sm" className="flex-shrink-0">
                             <Link to={`/need/${need.id}/donate`}>
                               <Heart className="mr-2 h-4 w-4" /> Help Now
                             </Link>
@@ -217,11 +222,12 @@ const Index = () => {
         </section>
       )}
 
-      <section className="py-12 md:py-20 px-4 bg-white">
+      {/* Medical Store Section */}
+      <section className="py-8 md:py-16 px-4 md:px-8 bg-white">
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col sm:flex-row justify-between items-center mb-8 md:mb-12 gap-4">
-            <h2 className="text-2xl md:text-3xl font-bold text-center sm:text-left">Medical Store</h2>
-            <Button asChild>
+          <div className="flex flex-col sm:flex-row justify-between items-center mb-6 md:mb-10 gap-4">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center sm:text-left">Medical Store</h2>
+            <Button asChild className="w-full sm:w-auto">
               <Link to="/medical-store">View All Products</Link>
             </Button>
           </div>
@@ -232,7 +238,7 @@ const Index = () => {
               <p className="mt-4 text-gray-600">Loading products...</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
               {medicines?.slice(0, 4).map((medicine) => (
                 <Card key={medicine.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                   <div className="p-4">
@@ -240,19 +246,19 @@ const Index = () => {
                       <img
                         src={medicine.image_url}
                         alt={medicine.name}
-                        className="w-full h-36 md:h-48 object-cover rounded-md mb-4"
+                        className="w-full h-32 sm:h-36 md:h-48 object-cover rounded-md mb-4"
                       />
                     ) : (
-                      <div className="w-full h-36 md:h-48 bg-gray-100 rounded-md mb-4 flex items-center justify-center">
+                      <div className="w-full h-32 sm:h-36 md:h-48 bg-gray-100 rounded-md mb-4 flex items-center justify-center">
                         <Package className="h-12 w-12 text-gray-400" />
                       </div>
                     )}
                     <div className="space-y-2">
-                      <h3 className="text-lg font-semibold line-clamp-1">{medicine.name}</h3>
+                      <h3 className="text-base sm:text-lg font-semibold line-clamp-1">{medicine.name}</h3>
                       <p className="text-sm text-gray-600 line-clamp-2">{medicine.description}</p>
                       <div className="flex items-center justify-between flex-wrap gap-2">
-                        <span className="text-lg font-bold">${medicine.price}</span>
-                        <Badge variant={medicine.in_stock ? "default" : "secondary"}>
+                        <span className="text-base sm:text-lg font-bold">${medicine.price}</span>
+                        <Badge variant={medicine.in_stock ? "default" : "secondary"} className="flex-shrink-0">
                           {medicine.in_stock ? "In Stock" : "Out of Stock"}
                         </Badge>
                       </div>
@@ -273,34 +279,35 @@ const Index = () => {
         </div>
       </section>
 
-      <section className="py-12 md:py-20 px-4 bg-gray-50">
+      {/* Features Section */}
+      <section className="py-8 md:py-16 px-4 md:px-8 bg-gray-50">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-2xl md:text-3xl font-bold text-center mb-8 md:mb-12">How HealthBridge Works</h2>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-            <Card className="p-6">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center mb-6 md:mb-10">How HealthBridge Works</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
+            <Card className="p-4 md:p-6">
               <div className="rounded-full bg-primary-50 w-12 h-12 flex items-center justify-center mb-4">
                 <Users className="h-6 w-6 text-primary-600" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">Connect</h3>
-              <p className="text-gray-600">
+              <h3 className="text-lg sm:text-xl font-semibold mb-2">Connect</h3>
+              <p className="text-sm sm:text-base text-gray-600">
                 Register and connect with verified healthcare providers and donors in your area.
               </p>
             </Card>
-            <Card className="p-6">
+            <Card className="p-4 md:p-6">
               <div className="rounded-full bg-primary-50 w-12 h-12 flex items-center justify-center mb-4">
                 <Calendar className="h-6 w-6 text-primary-600" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">Schedule</h3>
-              <p className="text-gray-600">
+              <h3 className="text-lg sm:text-xl font-semibold mb-2">Schedule</h3>
+              <p className="text-sm sm:text-base text-gray-600">
                 Book appointments with healthcare providers and track your medical journey.
               </p>
             </Card>
-            <Card className="p-6">
+            <Card className="p-4 md:p-6">
               <div className="rounded-full bg-primary-50 w-12 h-12 flex items-center justify-center mb-4">
                 <Heart className="h-6 w-6 text-primary-600" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">Receive Care</h3>
-              <p className="text-gray-600">
+              <h3 className="text-lg sm:text-xl font-semibold mb-2">Receive Care</h3>
+              <p className="text-sm sm:text-base text-gray-600">
                 Get the medical care you need through our network of verified providers.
               </p>
             </Card>
@@ -308,10 +315,11 @@ const Index = () => {
         </div>
       </section>
 
-      <section className="py-12 md:py-20 px-4 bg-primary-600 text-white">
+      {/* CTA Section */}
+      <section className="py-8 md:py-16 px-4 md:px-8 bg-primary-600 text-white">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6">Ready to Make a Difference?</h2>
-          <p className="text-lg md:text-xl mb-6 md:mb-8">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-4 md:mb-6">Ready to Make a Difference?</h2>
+          <p className="text-base sm:text-lg md:text-xl mb-6 md:mb-8">
             {user 
               ? "Create a medical need or help others in our community."
               : "Join our community of donors and healthcare providers helping those in need."
@@ -323,7 +331,7 @@ const Index = () => {
                 size="lg" 
                 variant="secondary" 
                 asChild 
-                className="bg-white text-primary-600 hover:bg-gray-100 w-full sm:w-auto"
+                className="w-full sm:w-auto bg-white text-primary-600 hover:bg-gray-100"
               >
                 <Link to="/create-need">
                   <Plus className="mr-2 h-5 w-5" /> Create Medical Need
@@ -333,7 +341,7 @@ const Index = () => {
                 size="lg" 
                 variant="outline" 
                 asChild 
-                className="bg-transparent text-white border-white hover:bg-white/10 w-full sm:w-auto"
+                className="w-full sm:w-auto bg-transparent text-white border-white hover:bg-white/10"
               >
                 <Link to="/find-help">
                   <Heart className="mr-2 h-5 w-5" /> Help Others
@@ -345,7 +353,7 @@ const Index = () => {
               size="lg" 
               variant="secondary" 
               asChild 
-              className="bg-white text-primary-600 hover:bg-gray-100 w-full sm:w-auto"
+              className="w-full sm:w-auto bg-white text-primary-600 hover:bg-gray-100"
             >
               <Link to="/auth">Get Started Today</Link>
             </Button>

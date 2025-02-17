@@ -105,7 +105,7 @@ const Index = () => {
       
       {/* Hero Section */}
       <section className="pt-8 md:pt-16 lg:pt-20 pb-12 md:pb-24 lg:pb-32 px-4 md:px-8">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-7xl mx-auto text-center">
           <h1 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4 md:mb-6">
             Bridging the Gap in
             <span className="text-primary-600 block sm:inline"> Healthcare Access</span>

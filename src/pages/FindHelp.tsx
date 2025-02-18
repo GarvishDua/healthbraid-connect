@@ -60,7 +60,7 @@ const FindHelp = () => {
       <Navigation />
       <div className="max-w-7xl mx-auto px-4 py-12">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Find Medical Help</h1>
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">Current Medical Needs</h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             Browse through medical needs in your area and help make a difference in someone's life.
           </p>

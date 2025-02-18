@@ -18,8 +18,8 @@ export const Navigation = () => {
     <>
       {user ? (
         <>
-          <Link to="/find-help" className="text-gray-600 hover:text-gray-900">Find Help</Link>
-          <Link to="/give-help" className="text-gray-600 hover:text-gray-900">Give Help</Link>
+          {/* <Link to="/find-help" className="text-gray-600 hover:text-gray-900">Find Help</Link> */}
+          <Link to="/give-help" className="text-gray-600 hover:text-gray-900">Contribute</Link>
           <Link to="/ai-assistant" className="text-gray-600 hover:text-gray-900">AI Assistant</Link>
           <Link to="/book-appointment" className="text-gray-600 hover:text-gray-900">Book Appointment</Link>
           <Link to="/cart" className="relative">

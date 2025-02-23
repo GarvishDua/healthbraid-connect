@@ -25,6 +25,9 @@ import MedicalNeedDetails from "./pages/MedicalNeedDetails";
 import MonetaryDonations from "./pages/MonetaryDonations";
 import BloodDonations from "./pages/BloodDonations";
 import OrganDonations from "./pages/OrganDonations";
+import BloodCenters from "./pages/BloodCenters";
+import ScheduleBloodDonation from "./pages/ScheduleBloodDonation";
+import RegularDonor from "./pages/RegularDonor";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +47,9 @@ const App = () => (
               <Route path="/give-help" element={<GiveHelp />} />
               <Route path="/monetary-donations" element={<MonetaryDonations />} />
               <Route path="/blood-donations" element={<BloodDonations />} />
+              <Route path="/blood-centers" element={<BloodCenters />} />
+              <Route path="/schedule-blood-donation" element={<ScheduleBloodDonation />} />
+              <Route path="/regular-donor" element={<RegularDonor />} />
               <Route path="/organ-donations" element={<OrganDonations />} />
               <Route path="/about" element={<About />} />
               <Route path="/profile" element={<Profile />} />

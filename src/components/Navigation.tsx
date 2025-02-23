@@ -3,9 +3,21 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/providers/AuthProvider";
-import { ShoppingCart, Menu, X } from "lucide-react";
+import { ShoppingCart, Menu } from "lucide-react";
 import { useCart } from "@/providers/CartProvider";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "@/components/ui/navigation-menu";
 
 export const Navigation = () => {
   const { user } = useAuth();
@@ -18,8 +30,35 @@ export const Navigation = () => {
     <>
       {user ? (
         <>
-          {/* <Link to="/find-help" className="text-gray-600 hover:text-gray-900">Find Help</Link> */}
-          <Link to="/give-help" className="text-gray-600 hover:text-gray-900">Contribute</Link>
+          <NavigationMenu>
+            <NavigationMenuList>
+              <NavigationMenuItem>
+                <NavigationMenuTrigger>Contribute</NavigationMenuTrigger>
+                <NavigationMenuContent>
+                  <div className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+                    <Link to="/monetary-donations" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                      <div className="text-sm font-medium leading-none">Monetary Donations</div>
+                      <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                        Support medical needs through financial contributions
+                      </p>
+                    </Link>
+                    <Link to="/blood-donations" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                      <div className="text-sm font-medium leading-none">Blood Donations</div>
+                      <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                        Save lives by donating blood
+                      </p>
+                    </Link>
+                    <Link to="/organ-donations" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                      <div className="text-sm font-medium leading-none">Organ Donations</div>
+                      <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                        Learn about organ donation
+                      </p>
+                    </Link>
+                  </div>
+                </NavigationMenuContent>
+              </NavigationMenuItem>
+            </NavigationMenuList>
+          </NavigationMenu>
           <Link to="/ai-assistant" className="text-gray-600 hover:text-gray-900">AI Assistant</Link>
           <Link to="/book-appointment" className="text-gray-600 hover:text-gray-900">Book Appointment</Link>
           <Link to="/cart" className="relative">

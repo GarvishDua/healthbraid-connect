@@ -60,6 +60,89 @@ export type Database = {
           },
         ]
       }
+      blood_centers: {
+        Row: {
+          accepting_donations: boolean | null
+          address: string
+          city: string
+          created_at: string | null
+          email: string | null
+          id: string
+          name: string
+          operating_hours: Json | null
+          phone: string
+          state: string
+          zip_code: string
+        }
+        Insert: {
+          accepting_donations?: boolean | null
+          address: string
+          city: string
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          name: string
+          operating_hours?: Json | null
+          phone: string
+          state: string
+          zip_code: string
+        }
+        Update: {
+          accepting_donations?: boolean | null
+          address?: string
+          city?: string
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          name?: string
+          operating_hours?: Json | null
+          phone?: string
+          state?: string
+          zip_code?: string
+        }
+        Relationships: []
+      }
+      blood_donation_appointments: {
+        Row: {
+          appointment_date: string
+          blood_type: string | null
+          center_id: string
+          created_at: string | null
+          id: string
+          special_notes: string | null
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          appointment_date: string
+          blood_type?: string | null
+          center_id: string
+          created_at?: string | null
+          id?: string
+          special_notes?: string | null
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          appointment_date?: string
+          blood_type?: string | null
+          center_id?: string
+          created_at?: string | null
+          id?: string
+          special_notes?: string | null
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blood_donation_appointments_center_id_fkey"
+            columns: ["center_id"]
+            isOneToOne: false
+            referencedRelation: "blood_centers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cart_items: {
         Row: {
           created_at: string
@@ -427,6 +510,39 @@ export type Database = {
           location?: string | null
           phone?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      regular_donors: {
+        Row: {
+          blood_type: string
+          created_at: string | null
+          donation_count: number | null
+          id: string
+          last_donation_date: string | null
+          medical_conditions: string[] | null
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          blood_type: string
+          created_at?: string | null
+          donation_count?: number | null
+          id?: string
+          last_donation_date?: string | null
+          medical_conditions?: string[] | null
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          blood_type?: string
+          created_at?: string | null
+          donation_count?: number | null
+          id?: string
+          last_donation_date?: string | null
+          medical_conditions?: string[] | null
+          status?: string | null
+          user_id?: string
         }
         Relationships: []
       }

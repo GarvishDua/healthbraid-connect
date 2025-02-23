@@ -4,8 +4,44 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Droplet, MapPin, CalendarDays, UserPlus } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/providers/AuthProvider";
+import { useToast } from "@/hooks/use-toast";
 
 const BloodDonations = () => {
+  const { user } = useAuth();
+  const { toast } = useToast();
+
+  // Fetch blood centers count
+  const { data: centerCount } = useQuery({
+    queryKey: ["bloodCentersCount"],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("blood_centers")
+        .select("*", { count: "exact", head: true });
+      
+      if (error) throw error;
+      return count || 0;
+    }
+  });
+
+  // Fetch if user is a regular donor
+  const { data: isRegularDonor } = useQuery({
+    queryKey: ["regularDonor", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("regular_donors")
+        .select("*")
+        .eq("user_id", user?.id)
+        .single();
+      
+      if (error && error.code !== "PGRST116") throw error;
+      return !!data;
+    }
+  });
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation />
@@ -15,6 +51,11 @@ const BloodDonations = () => {
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             Save lives by donating blood. Every donation can help up to three people in need.
           </p>
+          {!user && (
+            <Button asChild className="mt-6">
+              <Link to="/auth">Sign in to Start Donating</Link>
+            </Button>
+          )}
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -27,7 +68,9 @@ const BloodDonations = () => {
             </CardHeader>
             <CardContent>
               <p className="text-gray-600 mb-6">
-                Locate blood donation centers and mobile blood drives near you.
+                {centerCount 
+                  ? `Browse our network of ${centerCount} blood donation centers and mobile blood drives near you.`
+                  : "Locate blood donation centers and mobile blood drives near you."}
               </p>
               <Button asChild className="w-full">
                 <Link to="/blood-centers">Find Centers</Link>
@@ -44,10 +87,25 @@ const BloodDonations = () => {
             </CardHeader>
             <CardContent>
               <p className="text-gray-600 mb-6">
-                Book an appointment for your next blood donation.
+                Book an appointment for your next blood donation at a center near you.
               </p>
-              <Button asChild variant="outline" className="w-full">
-                <Link to="/schedule-blood-donation">Schedule Now</Link>
+              <Button 
+                asChild 
+                variant="outline" 
+                className="w-full"
+                onClick={() => {
+                  if (!user) {
+                    toast({
+                      title: "Sign in required",
+                      description: "Please sign in to schedule a blood donation.",
+                      variant: "destructive",
+                    });
+                  }
+                }}
+              >
+                <Link to={user ? "/schedule-blood-donation" : "/auth"}>
+                  Schedule Now
+                </Link>
               </Button>
             </CardContent>
           </Card>
@@ -61,13 +119,52 @@ const BloodDonations = () => {
             </CardHeader>
             <CardContent>
               <p className="text-gray-600 mb-6">
-                Join our regular donor program and help maintain blood supplies.
+                {isRegularDonor 
+                  ? "You're part of our regular donor program. Thank you for your commitment!"
+                  : "Join our regular donor program and help maintain blood supplies."}
               </p>
-              <Button asChild variant="outline" className="w-full">
-                <Link to="/regular-donor">Become Regular Donor</Link>
-              </Button>
+              {user ? (
+                <Button 
+                  asChild 
+                  variant={isRegularDonor ? "secondary" : "outline"} 
+                  className="w-full"
+                >
+                  <Link to="/regular-donor">
+                    {isRegularDonor ? "View Donor Profile" : "Become Regular Donor"}
+                  </Link>
+                </Button>
+              ) : (
+                <Button 
+                  asChild 
+                  variant="outline" 
+                  className="w-full"
+                >
+                  <Link to="/auth">Sign in to Join</Link>
+                </Button>
+              )}
             </CardContent>
           </Card>
+        </div>
+
+        <div className="mt-16 bg-primary-50 rounded-lg p-8 text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Why Donate Blood?</h2>
+          <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+            <div>
+              <Droplet className="h-8 w-8 text-primary-600 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Save Lives</h3>
+              <p className="text-gray-600">One donation can save up to three lives.</p>
+            </div>
+            <div>
+              <CalendarDays className="h-8 w-8 text-primary-600 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Regular Need</h3>
+              <p className="text-gray-600">Blood is needed every 2 seconds.</p>
+            </div>
+            <div>
+              <UserPlus className="h-8 w-8 text-primary-600 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Quick Process</h3>
+              <p className="text-gray-600">Donation takes only 10-12 minutes.</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

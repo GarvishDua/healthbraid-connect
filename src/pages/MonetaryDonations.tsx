@@ -35,20 +35,31 @@ const MonetaryDonations = () => {
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-lg transition-shadow">
+          <Card className="hover:shadow-lg transition-shadow relative overflow-hidden">
+            <div className="absolute top-2 right-2 bg-primary text-white text-xs px-2 py-1 rounded-full">
+              Most Popular
+            </div>
             <CardHeader>
               <div className="rounded-full bg-primary-50 w-12 h-12 flex items-center justify-center mb-4">
                 <CreditCard className="h-6 w-6 text-primary-600" />
               </div>
-              <CardTitle>Monthly Giving</CardTitle>
+              <CardTitle>Monthly Giving Program</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-gray-600 mb-6">
-                Set up recurring donations to provide sustainable support.
+                Join our community of monthly donors and unlock exclusive benefits with different tiers.
               </p>
-              <Button asChild variant="outline" className="w-full">
+              <Button asChild variant="default" className="w-full">
                 <Link to="/monthly-giving">Start Monthly Giving</Link>
               </Button>
+              <div className="mt-4 text-sm text-gray-500">
+                <p>Benefits include:</p>
+                <ul className="list-disc list-inside mt-2">
+                  <li>Recognition badges</li>
+                  <li>Exclusive events</li>
+                  <li>Impact reports</li>
+                </ul>
+              </div>
             </CardContent>
           </Card>
 

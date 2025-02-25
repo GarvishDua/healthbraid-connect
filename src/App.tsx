@@ -23,6 +23,7 @@ import AppointmentBooking from "./pages/AppointmentBooking";
 import Cart from "./pages/Cart";
 import MedicalNeedDetails from "./pages/MedicalNeedDetails";
 import MonetaryDonations from "./pages/MonetaryDonations";
+import MonthlyGiving from "./pages/MonthlyGiving";
 import BloodDonations from "./pages/BloodDonations";
 import OrganDonations from "./pages/OrganDonations";
 import BloodCenters from "./pages/BloodCenters";
@@ -46,6 +47,7 @@ const App = () => (
               <Route path="/find-help" element={<FindHelp />} />
               <Route path="/give-help" element={<GiveHelp />} />
               <Route path="/monetary-donations" element={<MonetaryDonations />} />
+              <Route path="/monthly-giving" element={<MonthlyGiving />} />
               <Route path="/blood-donations" element={<BloodDonations />} />
               <Route path="/blood-centers" element={<BloodCenters />} />
               <Route path="/schedule-blood-donation" element={<ScheduleBloodDonation />} />

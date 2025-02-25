@@ -1,6 +1,5 @@
 
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,10 +7,64 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "@/components/ui/use-toast";
-import { ArrowRight, Heart, Calendar, Shield } from "lucide-react";
+import { ArrowRight, Heart, Calendar, Shield, Trophy, Star, Gift, Award } from "lucide-react";
 import { Link } from "react-router-dom";
 
-const DONATION_AMOUNTS = [25, 50, 100, 250, 500];
+const DONATION_TIERS = [
+  {
+    name: "Friend",
+    amount: 25,
+    benefits: [
+      { icon: Heart, text: "Monthly impact report" },
+      { icon: Calendar, text: "Newsletter subscription" },
+    ],
+  },
+  {
+    name: "Supporter",
+    amount: 50,
+    benefits: [
+      { icon: Heart, text: "Monthly impact report" },
+      { icon: Calendar, text: "Newsletter subscription" },
+      { icon: Shield, text: "Donor recognition badge" },
+    ],
+  },
+  {
+    name: "Champion",
+    amount: 100,
+    benefits: [
+      { icon: Heart, text: "Monthly impact report" },
+      { icon: Calendar, text: "Newsletter subscription" },
+      { icon: Shield, text: "Silver donor recognition badge" },
+      { icon: Trophy, text: "Quarterly virtual meetups" },
+      { icon: Gift, text: "Exclusive donor updates" },
+    ],
+  },
+  {
+    name: "Guardian",
+    amount: 250,
+    benefits: [
+      { icon: Heart, text: "Monthly impact report" },
+      { icon: Calendar, text: "Newsletter subscription" },
+      { icon: Shield, text: "Gold donor recognition badge" },
+      { icon: Trophy, text: "Monthly virtual meetups" },
+      { icon: Gift, text: "Priority donor updates" },
+      { icon: Star, text: "Annual appreciation event" },
+    ],
+  },
+  {
+    name: "Benefactor",
+    amount: 500,
+    benefits: [
+      { icon: Heart, text: "Monthly impact report" },
+      { icon: Calendar, text: "Newsletter subscription" },
+      { icon: Shield, text: "Platinum donor recognition badge" },
+      { icon: Trophy, text: "Monthly virtual meetups" },
+      { icon: Gift, text: "VIP donor updates" },
+      { icon: Star, text: "VIP appreciation events" },
+      { icon: Award, text: "Personal impact coordinator" },
+    ],
+  },
+];
 
 const MonthlyGiving = () => {
   const [selectedAmount, setSelectedAmount] = useState<number>(50);
@@ -25,12 +78,21 @@ const MonthlyGiving = () => {
     }
   };
 
+  const getCurrentTier = (amount: number) => {
+    return DONATION_TIERS.reduce((prev, current) => {
+      return amount >= current.amount ? current : prev;
+    }, DONATION_TIERS[0]);
+  };
+
   const handleSubscribe = () => {
+    const tier = getCurrentTier(selectedAmount);
     toast({
-      title: "Subscription initiated",
-      description: `Your monthly donation of $${selectedAmount} is being processed.`,
+      title: `Thank you for becoming a ${tier.name}!`,
+      description: `Your monthly donation of $${selectedAmount} will help save lives.`,
     });
   };
+
+  const currentTier = getCurrentTier(selectedAmount);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -45,7 +107,7 @@ const MonthlyGiving = () => {
 
         <div className="grid md:grid-cols-12 gap-8">
           <div className="md:col-span-8">
-            <Card>
+            <Card className="mb-8">
               <CardHeader>
                 <CardTitle>Select Your Monthly Contribution</CardTitle>
               </CardHeader>
@@ -59,18 +121,19 @@ const MonthlyGiving = () => {
                     }}
                   >
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                      {DONATION_AMOUNTS.map((amount) => (
-                        <div key={amount}>
+                      {DONATION_TIERS.map((tier) => (
+                        <div key={tier.amount}>
                           <RadioGroupItem
-                            value={amount.toString()}
-                            id={`amount-${amount}`}
+                            value={tier.amount.toString()}
+                            id={`amount-${tier.amount}`}
                             className="peer hidden"
                           />
                           <Label
-                            htmlFor={`amount-${amount}`}
+                            htmlFor={`amount-${tier.amount}`}
                             className="flex flex-col items-center justify-center rounded-md border-2 border-muted bg-transparent p-4 hover:bg-gray-50 peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 cursor-pointer"
                           >
-                            <span className="text-2xl font-bold">${amount}</span>
+                            <span className="text-sm font-medium mb-1">{tier.name}</span>
+                            <span className="text-2xl font-bold">${tier.amount}</span>
                             <span className="text-sm text-muted-foreground">per month</span>
                           </Label>
                         </div>
@@ -96,6 +159,22 @@ const MonthlyGiving = () => {
                   <Button onClick={handleSubscribe} className="w-full" size="lg">
                     Subscribe Monthly <ArrowRight className="ml-2" />
                   </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Your Benefits as a {currentTier.name}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {currentTier.benefits.map((benefit, index) => (
+                    <div key={index} className="flex items-center space-x-3 p-3 rounded-lg bg-primary/5">
+                      <benefit.icon className="h-5 w-5 text-primary" />
+                      <p className="text-sm font-medium">{benefit.text}</p>
+                    </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>

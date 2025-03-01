@@ -2,7 +2,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -20,29 +20,65 @@ serve(async (req) => {
     
     console.log('Processing symptoms:', symptoms);
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    if (!geminiApiKey) {
+      console.error('GEMINI_API_KEY is not set in environment variables');
+      throw new Error('GEMINI_API_KEY is not configured. Please add it to your Supabase Edge Function secrets.');
+    }
+
+    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
         'Content-Type': 'application/json',
+        'x-goog-api-key': geminiApiKey
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          { 
-            role: 'system', 
-            content: 'You are a knowledgeable health assistant. Suggest safe home remedies for symptoms. Format your response in a clear, easy-to-read way. Include a disclaimer about seeking professional medical advice. Focus on evidence-based, generally safe remedies.' 
-          },
-          { 
-            role: 'user', 
-            content: `Please suggest some safe home remedies for these symptoms: ${symptoms}` 
+        contents: [
+          {
+            role: 'user',
+            parts: [
+              {
+                text: `You are a knowledgeable health assistant. Please suggest safe home remedies for these symptoms: ${symptoms}. 
+                Format your response in a clear, easy-to-read way. Include a disclaimer about seeking professional medical advice. 
+                Focus on evidence-based, generally safe remedies.`
+              }
+            ]
           }
         ],
+        generationConfig: {
+          temperature: 0.2,
+          topK: 40,
+          topP: 0.95,
+          maxOutputTokens: 1024,
+        },
+        safetySettings: [
+          {
+            category: "HARM_CATEGORY_HARASSMENT",
+            threshold: "BLOCK_MEDIUM_AND_ABOVE"
+          },
+          {
+            category: "HARM_CATEGORY_HATE_SPEECH",
+            threshold: "BLOCK_MEDIUM_AND_ABOVE"
+          },
+          {
+            category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+            threshold: "BLOCK_MEDIUM_AND_ABOVE"
+          },
+          {
+            category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+            threshold: "BLOCK_MEDIUM_AND_ABOVE"
+          }
+        ]
       }),
     });
 
     const data = await response.json();
-    const generatedText = data.choices[0].message.content;
+    console.log('Gemini API response:', JSON.stringify(data, null, 2));
+
+    if (!data.candidates || data.candidates.length === 0) {
+      throw new Error('No response generated from Gemini');
+    }
+
+    const generatedText = data.candidates[0].content.parts[0].text;
 
     console.log('Generated response:', generatedText);
 
@@ -58,7 +94,7 @@ serve(async (req) => {
     console.error('Error in health-assistant function:', error);
     return new Response(
       JSON.stringify({ 
-        error: 'Failed to generate health recommendations. Please try again.' 
+        error: error.message || 'Failed to generate health recommendations. Please try again.' 
       }),
       { 
         status: 500, 

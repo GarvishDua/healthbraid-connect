@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
@@ -7,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/providers/AuthProvider";
 import { Navigate } from "react-router-dom";
+import { AlertCircle } from "lucide-react";
 
 const AIAssistant = () => {
   const { user } = useAuth();
@@ -14,6 +16,7 @@ const AIAssistant = () => {
   const [symptoms, setSymptoms] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [recommendation, setRecommendation] = useState("");
+  const [error, setError] = useState("");
 
   // Redirect if not logged in
   if (!user) {
@@ -31,12 +34,24 @@ const AIAssistant = () => {
     }
 
     setIsLoading(true);
+    setError("");
     try {
+      console.log("Sending symptoms to edge function:", symptoms);
+      
       const response = await supabase.functions.invoke('health-assistant', {
         body: { symptoms },
       });
 
-      if (response.error) throw response.error;
+      console.log("Response from edge function:", response);
+
+      if (response.error) {
+        console.error("Edge function error:", response.error);
+        throw new Error(response.error.message || "Failed to get recommendations");
+      }
+
+      if (!response.data || !response.data.response) {
+        throw new Error("Invalid response from health assistant");
+      }
 
       setRecommendation(response.data.response);
       toast({
@@ -45,6 +60,7 @@ const AIAssistant = () => {
       });
     } catch (error: any) {
       console.error('Error getting AI recommendations:', error);
+      setError(error.message || "Failed to generate recommendations. Please try again.");
       toast({
         title: "Error",
         description: "Failed to generate recommendations. Please try again.",
@@ -92,6 +108,19 @@ const AIAssistant = () => {
               )}
             </Button>
           </form>
+
+          {error && (
+            <div className="mt-6 p-4 bg-red-50 text-red-700 rounded-lg flex items-start">
+              <AlertCircle className="h-5 w-5 mr-2 mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="font-semibold">Error</p>
+                <p>{error}</p>
+                <p className="mt-2 text-sm">
+                  Note: You need to add the OPENAI_API_KEY to your Supabase Edge Function secrets.
+                </p>
+              </div>
+            </div>
+          )}
 
           {recommendation && (
             <div className="mt-6 p-4 bg-primary-50 rounded-lg">

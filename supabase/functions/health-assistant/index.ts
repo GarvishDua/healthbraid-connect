@@ -1,5 +1,8 @@
+
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@0.1.3";
+
+const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -14,25 +17,38 @@ serve(async (req) => {
 
   try {
     const { symptoms } = await req.json();
-    const genAI = new GoogleGenerativeAI(Deno.env.get('GEMINI_API_KEY')!);
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-
+    
     console.log('Processing symptoms:', symptoms);
 
-    const prompt = `As a health assistant, please suggest some safe home remedies for the following symptoms: ${symptoms}. 
-                   Format your response in a clear, easy-to-read way. 
-                   Include a disclaimer about seeking professional medical advice.
-                   Focus on evidence-based, generally safe remedies.`;
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openAIApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          { 
+            role: 'system', 
+            content: 'You are a knowledgeable health assistant. Suggest safe home remedies for symptoms. Format your response in a clear, easy-to-read way. Include a disclaimer about seeking professional medical advice. Focus on evidence-based, generally safe remedies.' 
+          },
+          { 
+            role: 'user', 
+            content: `Please suggest some safe home remedies for these symptoms: ${symptoms}` 
+          }
+        ],
+      }),
+    });
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
+    const data = await response.json();
+    const generatedText = data.choices[0].message.content;
 
-    console.log('Generated response:', text);
+    console.log('Generated response:', generatedText);
 
     return new Response(
       JSON.stringify({ 
-        response: text 
+        response: generatedText 
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
